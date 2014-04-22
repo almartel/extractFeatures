@@ -443,16 +443,27 @@ class Dynamic(object):
             
             ### Get inside of VOI            
             [VOI_scalars, VOIdims] = self.createMaskfromMesh(VOI_mesh, transformed_image)
+            print "\n VOIdims"
+            print VOIdims
             
             # get non zero elements
-            VOI_scalars = transformed_image.GetPointData().GetScalars()
-            numpy_VOI_imagedata = vtk_to_numpy(VOI_scalars)     
+            image_scalars = transformed_image.GetPointData().GetScalars()
+            numpy_VOI_imagedata = vtk_to_numpy(image_scalars)     
             
             numpy_VOI_imagedata = numpy_VOI_imagedata.reshape(VOIdims[2], VOIdims[1], VOIdims[0]) 
             numpy_VOI_imagedata = numpy_VOI_imagedata.transpose(2,1,0)
             
+            print "Shape of VOI_imagedata: "
+            print numpy_VOI_imagedata.shape
+            
             #################### HERE GET IT AND MASK IT OUT
-            VOI_imagedata = numpy_VOI_imagedata[nonzero(VOI_scalars)]          
+            self.nonzeroVOIextracted = nonzero(VOI_scalars)
+            print self.nonzeroVOIextracted
+            
+            VOI_imagedata = numpy_VOI_imagedata[self.nonzeroVOIextracted]     
+            
+            print "shape of VOI_imagedata  Clipped:"
+            print VOI_imagedata.shape
         
             for j in range( len(VOI_imagedata) ):
                 pixValx = VOI_imagedata[j]
