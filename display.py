@@ -215,7 +215,23 @@ class Display(object):
         flipY_origin_image.SetOutputOrigin(origin[0,0], origin[0,1], origin[0,2])
         flipY_origin_image.Update()
         
-        return flipY_origin_image.GetOutput(), transform_cube   
+        transformed_image = flipY_origin_image.GetOutput()
+        
+        transformed_image.UpdateInformation()
+        self.dims = transformed_image.GetDimensions()
+        print "Image Dimensions"
+        print self.dims
+        (xMin, xMax, yMin, yMax, zMin, zMax) = transformed_image.GetWholeExtent()
+        print "Image Extension"
+        print xMin, xMax, yMin, yMax, zMin, zMax
+        self.spacing = transformed_image.GetSpacing()
+        print "Image Spacing"
+        print self.spacing
+        self.origin = transformed_image.GetOrigin()
+        print "Image Origin"
+        print self.origin
+        
+        return transformed_image, transform_cube   
             
     def addSegment(self, lesion3D):        
        
@@ -261,7 +277,77 @@ class Display(object):
         subtractedImage = sub_pre
         
         return subtractedImage
-               
+        
+
+    def display_pick(self, images, image_pos_pat, image_ori_pat, postS):
+        
+        #subtract volumes based on indicated postS            
+        # define image based on subtraction of postS -preS
+        image = self.subImage(images, postS)    
+
+        # Proceed to build reference frame for display objects based on DICOM coords   
+        [transformed_image, transform_cube] = self.dicomTransform(image, image_pos_pat, image_ori_pat)
+                
+        # Calculate the center of the volume
+        transformed_image.UpdateInformation() 
+    
+        # Set up ortogonal planes
+        self.xImagePlaneWidget.SetInput( transformed_image )
+        self.xImagePlaneWidget.SetPlaneOrientationToXAxes()
+        self.xImagePlaneWidget.SetSliceIndex(0)
+        self.yImagePlaneWidget.SetInput( transformed_image )
+        self.yImagePlaneWidget.SetPlaneOrientationToYAxes()
+        self.yImagePlaneWidget.SetSliceIndex(0)
+        self.zImagePlaneWidget.SetInput( transformed_image )
+        self.zImagePlaneWidget.SetPlaneOrientationToZAxes()
+        self.zImagePlaneWidget.SetSliceIndex(0)
+            
+        self.xImagePlaneWidget.On()
+        self.yImagePlaneWidget.On()
+        self.zImagePlaneWidget.On()
+        
+        ############
+        self.textMapper = vtk.vtkTextMapper()
+        tprop = self.textMapper.GetTextProperty()
+        tprop.SetFontFamilyToArial()
+        tprop.SetFontSize(10)
+        tprop.BoldOn()
+        tprop.ShadowOn()
+        tprop.SetColor(1, 0, 0)
+           
+        # initialize 
+        self.seeds = vtk.vtkPoints()  
+        self.textActor = vtk.vtkActor2D()
+        self.textActor.VisibilityOff() 
+        self.textActor.SetMapper(textMapper)
+
+        # Initizalize
+        self.iren1.SetPicker(self.picker)
+        self.picker.AddObserver("EndPickEvent", annotatePick)
+        self.renWin1.Render()
+        self.renderer1.Render()
+        self.iren1.Start()
+                
+        return self.seeds
+    
+    def annotatePick(object, event):
+                
+        if(self.picker.GetCellId() < 0):
+            self.textActor.VisibilityOff()     
+        else:
+            print "pick"
+            selPt = self.picker.GetSelectionPoint()
+            pickPos = self.picker.GetPickPosition()
+            self.seeds.InsertNextPoint(pickPos[0], pickPos[1], pickPos[2] )
+            print pickPos
+                    
+            self.textMapper.SetInput("(%.6f, %.6f, %.6f)"%pickPos)
+            self.textActor.SetPosition(selPt[:2])
+            self.textActor.VisibilityOn()
+        
+        return 
+      
+      
     def visualize(self, images, image_pos_pat, image_ori_pat, sub, postS, interact):
         
         if(sub):
@@ -302,75 +388,3 @@ class Display(object):
             
         self.xImagePlaneWidget.On()
         self.yImagePlaneWidget.On()
-        self.zImagePlaneWidget.On()
-        
-        # set up cube actor with Orientation(A-P, S-I, L-R) using transform_cube
-        # Set up to ALS (+X=A, +Y=S, +Z=L) source:
-        cube = vtk.vtkAnnotatedCubeActor()
-        cube.SetXPlusFaceText( "L" );
-        cube.SetXMinusFaceText( "R" );
-        cube.SetYPlusFaceText( "A" );
-        cube.SetYMinusFaceText( "P" );
-        cube.SetZPlusFaceText( "S" );
-        cube.SetZMinusFaceText( "I" );
-        cube.SetFaceTextScale( 0.5 );
-        cube.GetAssembly().SetUserTransform( transform_cube );
-            
-        # Set UP the axes
-        axes2 = vtk.vtkAxesActor()
-        axes2.SetShaftTypeToCylinder();
-        #axes2.SetUserTransform( transform_cube );         
-        axes2.SetTotalLength( 1.5, 1.5, 1.5 );
-        axes2.SetCylinderRadius( 0.500 * axes2.GetCylinderRadius() );
-        axes2.SetConeRadius( 1.025 * axes2.GetConeRadius() );
-        axes2.SetSphereRadius( 1.500 * axes2.GetSphereRadius() );
-    
-        tprop2 = axes2.GetXAxisCaptionActor2D()
-        tprop2.GetCaptionTextProperty();
-    
-        assembly = vtk.vtkPropAssembly();
-        assembly.AddPart( axes2 );
-        assembly.AddPart( cube );
-        
-        widget = vtk.vtkOrientationMarkerWidget();
-        widget.SetOutlineColor( 0.9300, 0.5700, 0.1300 );
-        widget.SetOrientationMarker( assembly );
-        widget.SetInteractor( self.iren1 );
-        widget.SetViewport( 0.0, 0.0, 0.4, 0.4 );
-        widget.SetEnabled( 1 );
-        widget.InteractiveOff();
-                    
-        # Create a text property for both cube axes
-        tprop = vtk.vtkTextProperty()
-        tprop.SetColor(1, 1, 1)
-        tprop.ShadowOff()
-        
-        # Create a vtkCubeAxesActor2D.  Use the outer edges of the bounding box to
-        # draw the axes.  Add the actor to the renderer.
-        axes = vtk.vtkCubeAxesActor2D()
-        axes.SetInput(transformed_image)
-        axes.SetCamera(self.renderer1.GetActiveCamera())
-        axes.SetLabelFormat("%6.4g")
-        axes.SetFlyModeToOuterEdges()
-        axes.SetFontFactor(1.2)
-        axes.SetAxisTitleTextProperty(tprop)
-        axes.SetAxisLabelTextProperty(tprop)      
-        self.renderer1.AddViewProp(axes)
-        
-        ############
-        # bounds and initialize camera
-        bounds = transformed_image.GetBounds()
-        self.renderer1.ResetCamera(bounds)    
-        self.renderer1.ResetCameraClippingRange()
-        self.camera.SetViewUp(0.0,-1.0,0.0)
-        self.camera.Azimuth(315)
-        
-        # Initizalize
-        self.renWin1.Render()
-        self.renderer1.Render()
-        
-        if(interact==True):
-            self.iren1.Start()  
-                            
-        return
-
