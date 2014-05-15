@@ -375,11 +375,11 @@ class Dynamic(object):
         
         # Vr_decreasingRate
         if( self.peakVr == 4):
-            Vr_decreasingRate = 0
+            self.Vr_decreasingRate = 0
         else:
-            Vr_decreasingRate = float((self.maxVr - array(Vrk['Vr'+str(4)]).astype(float))/(4-self.peakVr))
+            self.Vr_decreasingRate = float((self.maxVr - array(Vrk['Vr'+str(4)]).astype(float))/(4-self.peakVr))
         print "Vr_decreasingRate (Fiii_4) "
-        print Vr_decreasingRate
+        print self.Vr_decreasingRate
         
         # Vr_post_1 
         self.Vr_post_1 = float( array(Vrk['Vr'+str(1)]).astype(float))
@@ -388,8 +388,8 @@ class Dynamic(object):
  
         ##################################################
         # orgamize into dataframe
-        self.dynamicEMM_contour = DataFrame( data=array([[ self.amp, self.alpha, self.beta, self.iAUC1, self.Slope_ini, self.Tpeak, self.Kpeak, self.SER, self.maxCr, self.peakCr, self.UptakeRate, self.washoutRate, self.maxVr, self.peakVr, self.Vr_increasingRate, self.Vr_post_1]]), 
-                                columns=['A', 'alpha', 'beta', 'iAUC1', 'Slope_ini', 'Tpeak', 'Kpeak', 'SER', 'maxCr', 'peakCr', 'UptakeRate', 'washoutRate', 'maxVr', 'peakVr','Vr_increasingRate', 'Vr_post_1'])
+        self.dynamicEMM_contour = DataFrame( data=array([[ self.amp, self.alpha, self.beta, self.iAUC1, self.Slope_ini, self.Tpeak, self.Kpeak, self.SER, self.maxCr, self.peakCr, self.UptakeRate, self.washoutRate, self.maxVr, self.peakVr, self.Vr_increasingRate, self.Vr_decreasingRate, self.Vr_post_1]]), 
+                                columns=['A.countor', 'alpha.countor', 'beta.countor', 'iAUC1.countor', 'Slope_ini.countor', 'Tpeak.countor', 'Kpeak.countor', 'SER.countor', 'maxCr.contour', 'peakCr.contour', 'UptakeRate.contour', 'washoutRate.contour', 'maxVr.contour', 'peakVr.contour','Vr_increasingRate.contour', 'Vr_decreasingRate.contour', 'Vr_post_1.contour'])
 
         #############################################################
         # try to plot results
@@ -695,11 +695,11 @@ class Dynamic(object):
         
         # Vr_decreasingRate
         if( self.peakVr == 4):
-            Vr_decreasingRate = 0
+            self.Vr_decreasingRate = 0
         else:
-            Vr_decreasingRate = float((self.maxVr - array(Vrk['Vr'+str(4)]).astype(float))/(4-self.peakVr))
+            self.Vr_decreasingRate = float((self.maxVr - array(Vrk['Vr'+str(4)]).astype(float))/(4-self.peakVr))
         print "Vr_decreasingRate (Fiii_4) "
-        print Vr_decreasingRate
+        print self.Vr_decreasingRate
         
         # Vr_post_1 
         self.Vr_post_1 = float( array(Vrk['Vr'+str(1)]).astype(float))
@@ -708,8 +708,8 @@ class Dynamic(object):
  
         ##################################################
         # orgamize into dataframe
-        self.dynamicEMM_inside = DataFrame( data=array([[ self.amp, self.alpha, self.beta, self.iAUC1, self.Slope_ini, self.Tpeak, self.Kpeak, self.SER, self.maxCr, self.peakCr, self.UptakeRate, self.washoutRate, self.maxVr, self.peakVr, self.Vr_increasingRate, self.Vr_post_1]]), 
-                                columns=['A', 'alpha', 'beta', 'iAUC1', 'Slope_ini', 'Tpeak', 'Kpeak', 'SER', 'maxCr', 'peakCr', 'UptakeRate', 'washoutRate', 'maxVr', 'peakVr','Vr_increasingRate', 'Vr_post_1'])
+        self.dynamicEMM_inside = DataFrame( data=array([[ self.amp, self.alpha, self.beta, self.iAUC1, self.Slope_ini, self.Tpeak, self.Kpeak, self.SER, self.maxCr, self.peakCr, self.UptakeRate, self.washoutRate, self.maxVr, self.peakVr, self.Vr_increasingRate, self.Vr_decreasingRate, self.Vr_post_1]]), 
+                                columns=['A.inside', 'alpha.inside', 'beta.inside', 'iAUC1.inside', 'Slope_ini.inside', 'Tpeak.inside', 'Kpeak.inside', 'SER.inside', 'maxCr.inside', 'peakCr.inside', 'UptakeRate.inside', 'washoutRate.inside', 'maxVr.inside', 'peakVr.inside','Vr_increasingRate.inside', 'Vr_decreasingRate.inside', 'Vr_post_1.inside'])
 
         #############################################################
         # try to plot results
