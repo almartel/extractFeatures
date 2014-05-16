@@ -1,0 +1,214 @@
+,cad.cad_pt_no_txt,cad.latest_mutation,exam.exam_dt_datetime,exam.a_number_txt,exam.mri_cad_status_txt,exam.comment_txt,finding.mri_mass_yn,finding.mri_nonmass_yn,finding.mri_foci_yn,proc.pt_procedure_id,proc.proc_dt_datetime,proc.proc_side_int,proc.proc_source_int,proc.proc_guid_int,proc.proc_tp_int,proc.original_report_txt,is_insitu,is_invasive,Diagnosis,BenignNMaligNAnt,labels,id,A.countor,alpha.countor,beta.countor,iAUC1.countor,Slope_ini.countor,Tpeak.countor,Kpeak.countor,SER.countor,maxCr.contour,peakCr.contour,UptakeRate.contour,washoutRate.contour,maxVr.contour,peakVr.contour,Vr_increasingRate.contour,Vr_decreasingRate.contour,Vr_post_1.contour,A.inside,alpha.inside,beta.inside,iAUC1.inside,Slope_ini.inside,Tpeak.inside,Kpeak.inside,SER.inside,maxCr.inside,peakCr.inside,UptakeRate.inside,washoutRate.inside,maxVr.inside,peakVr.inside,Vr_increasingRate.inside,Vr_decreasingRate.inside,Vr_post_1.inside,min_F_r_i,max_F_r_i,mean_F_r_i,var_F_r_i,skew_F_r_i,kurt_F_r_i,iMax_Variance_uptake,iiMin_change_Variance_uptake,iiiMax_Margin_Gradient,k_Max_Margin_Grad,ivVariance,circularity,irregularity,edge_sharp_mean,edge_sharp_std,max_RGH_mean,max_RGH_mean_k,max_RGH_var,max_RGH_var_k,texture_contrast_zero,texture_contrast_quarterRad,texture_contrast_halfRad,texture_contrast_threeQuaRad,texture_homogeneity_zero,texture_homogeneity_quarterRad,texture_homogeneity_halfRad,texture_homogeneity_threeQuaRad,texture_dissimilarity_zero,texture_dissimilarity_quarterRad,texture_dissimilarity_halfRad,texture_dissimilarity_threeQuaRad,texture_correlation_zero,texture_correlation_quarterRad,texture_correlation_halfRad,texture_correlation_threeQuaRad,texture_ASM_zero,texture_ASM_quarterRad,texture_ASM_halfRad,texture_ASM_threeQuaRad,texture_energy_zero,texture_energy_quarterRad,texture_energy_halfRad,texture_energy_threeQuaRad
+0,6052,Other,2010-09-10,5369136,Unknown,Known right DCIS,False,False,False,2231,2010-11-16,Right,Surgical/Operating Rm (includes 'Sentinel Lymph Node Biopsy'),N/A,N/A,"Nov 16, 2010
+
+AP Report: 
+     (NOTE)
+     
+     SURGICAL  PATHOLOGY  REPORT
+
+     Encounter #: 2072510A
+     Specimen #: S10-30714
+     
+     CLINICAL INFORMATION
+     Breast ca.
+     
+     SPECIMENS SUBMITTED
+     A: Sentinel node # 1 right breast, blue, 2445
+     B: Sentinel node # 2 right breast, not blue, 852
+     C: Sentinel node # 3 right breast, blue, 1110
+     D: Right breast
+     
+     
+     
+     DIAGNOSIS
+     A.  Sentinel node # 1 right breast, blue, 2445, biopsy:
+     ONE LYMPH NODE NEGATIVE FOR METASTATIC CARCINOMA
+     
+     B.  Sentinel node # 2 right breast, not blue, 852, biopsy:
+     ONE LYMPH NODE NEGATIVE FOR METASTATIC CARCINOMA
+     
+     Part C - Sentinel node # 3 right breast, blue, 1110:
+     ONE LYMPH NODE NEGATIVE FOR METASTATIC CARCINOMA
+     
+     D.  Right breast, simple mastectomy:
+     INVASIVE AND IN-SITU DUCT CARCINOMA OF THE BREAST  SEE SYNOPTIC REPORT
+     
+     
+     
+     
+     
+        Specimen
+        Type:                          Total breast (including nipple
+                                       and skin)
+        Procedure:                     Total mastectomy
+        Lymph Node Sampling:           Sentinel lymph node(s)
+        Specimen Integrity:            Single intact breast specimen
+        Specimen Laterality:           Right
+        Tumour Site: Invasive Carcinoma: Upper outer quadrant, Lower
+                                       outer quadrant
+     Tumour
+        Carcinoma:                     Present
+            Histologic Type:           Invasive ductal carcinoma, nos
+                Note:                  This specimen shows mainly
+                                       in-situ carcinoma with 2 small
+                                       foci of invasion in a much larger
+                                       area of in-situ carcinoma.
+            Grading System
+                Overall Grade:         II (intermediate)
+                Overall Score:         7/9
+                Tubular Formation:     3/3
+                Nuclear Pleomorphism:  3/3
+                Mitotic Score:         1/3
+        Ductal Carcinoma In Situ:      DCIS is present
+            Further Classification of DCIS: EIC positive
+            Estimated Size (extent) of DCIS
+                Dimensions:            8.5 x 5 x 3 cm
+                Number of Blocks Examined: 35
+                Number of Blocks with DCIS: 17
+            Architectural Patterns:    Solid
+            Nuclear Grade:             3/3
+            Comedo Necrosis:           Present, extensive
+            Extent in Tumour (%):      >90%
+            Extent away from Tumour:   Present
+            Biopsy Site Reaction:      Present
+        Lobular Carcinoma In Situ :    Not identified
+        Note:                          This specimen has been sampled in
+                                       30 regular blocks as well as 5
+                                       whole-mount sections.  There is
+                                       extensive involvement by in-situ
+                                       duct carcinoma as well as 2 foci
+                                       of invasion.
+     Extent
+        Tumour Size / Focality
+            Size of Invasive Component:
+                Dimensions:            0.6 x 0.6 x 0.5 cm
+            Tumour Focality:           Multiple foci of invasive
+                                       carcinoma
+                Number of Foci:        2
+                Sizes of Individual Foci: There are two foci of invasion.
+                                        The largest one measures 0.6 x
+                                       0.6 x 0.5 cm (6 x 6 x 5 mm).  The
+                                       smaller one measures 0.2 x 0.2 cm
+                                       (2 x 2 mm).  The two foci are
+                                       located approximately 0.5 cm (5mm)
+                                       from each other.  The histologic
+                                       grade and appearance of the two
+                                       foci are identical.
+        Extent of Tumour
+            Skin:                      Invasive carcinoma is not
+                                       directly invading the dermis and
+                                       epidermis
+            Dermal Lymph-Vascular Invasion: Not identified
+            Nipple:                    Unremarkable
+            Skeletal Muscle:           No skeletal muscle is present
+     Margins
+        Invasive Carcinoma:            Margins uninvolved by invasive
+                                       carcinoma
+            Distance From Closest Margin (mm): 5
+            Closest Margin:            Posterior
+        Ductal Carcinoma In Situ (DCIS): Margins uninvolved by DCIS
+            Distance of DCIS from Closest Margin (mm): 4
+            Closest Margin (DCIS):     Posterior
+     Accessory Findings
+        Lymph-Vascular Invasion:       Not identified
+        Perineural Invasion:           Not identified
+        Microcalcifications:           Present in DCIS
+        Treatment Effect: Response to Presurgical (Neoadjuvant) Therapy
+            In the Breast:             No known presurgical therapy
+            In the Lymph Nodes:        No known presurgical therapy
+     Lymph Nodes
+        Summary of All Nodes
+            Total Number Examined (Sentinel and Non-Sentinel): 3
+            Number of Nodes with ITCs: 0
+            Micro / Macro Metastases:  Absent
+        Sentinel Nodes
+            Sentinel Lymph Node Biopsy: Performed
+                Number Examined:       3
+     Special Studies
+        Estrogen Receptor:             Biomarkers report to follow
+        Progesterone Receptor:         Biomarkers report to follow
+        HER2 / neu
+            Immunoperoxidase Studies:  Biomarkers report to follow
+     Additional Non-Tumour
+        Additional Pathologic Findings: Proliferative fibrocystic changes
+     
+     
+     
+     
+     
+     MACROSCOPIC DESCRIPTION
+     A. The specimen container is labeled with the patient name and
+     'sentinel node #1 right breast, blue, 2445'. The accompanying
+     requisition matches the container's label.  The specimen consists of 1
+     lymph node measuring 1.5 x 1.2 x 0.5 cm with attached fibroadipose
+     tissue measuring in aggregate 0.2 x 0.2 x 0.2 cm.  The specimen is
+     submitted in toto as follows:
+     1-2      lymph node serially sectioned
+     3     remainder fibroadipose tissue
+     
+     B. The specimen container is labeled with the patient name and 'right
+     breast sentinel #2, not blue, 852'. The accompanying requisition
+     matches the container's label.  The specimen consists of 1 lymph node
+     measuring 0.6 x 0.3 x 0.2 cm with attached fibroadipose tissue
+     measuring in aggregate 0.2 x 0.2 x 0.2 cm.  The specimen is submitted
+     in toto as follows:
+     1     lymph node trisected
+     2     remainder fibroadipose tissue
+     
+     C. The specimen container is labeled with the patient name and 'right
+     breast sentinel node number 3, blue, 1110'. The accompanying
+     requisition matches the container's label.  The specimen consists of 1
+     lymph node measuring 2 x 1.5 x 0.8 cm with attached fibroadipose
+     tissue measuring in aggregate 0.4 x 0.4 x 0.4 cm.  The specimen is
+     submitted in toto as follows:
+     1-2     lymph node serially sectioned
+     3     remainder fibroadipose tissue
+     
+     D. The specimen container is labeled with the patient name and 'right
+     breast'. The accompanying requisition matches the container's label.
+     The specimen consists of an oriented right breast (short silk marks
+     superior, and a long stitch lateral margin) measuring 21cm ML x 20cm
+     SI x 6cm AP.  The breast margins painted green.  The attached skin is
+     oval and measures 6.5cm ML x 6cm SI.  The areola measures 3 cm in
+     diameter, the nipple measures 1 cm in diameter and is raised 0.6 cm.
+     The areola surrounding the nipple is slightly retracted.  The specimen
+     is serially sectioned from the medial to the lateral aspect and
+     displays firm white fibrotic tissue involving mainly the central
+     inferior aspect of the breast and measuring 12 cm in greatest
+     dimension.  It displays blue discoloration over the central medial
+     aspect, consistent grossly with dye injected in the operating room for
+     the assessment of sentinel lymph nodes.  No gross tumor identified.
+     The breast slices are photocopied and x-ray.  Slices 8, 9 and 10 are
+     submitted for whole mount sectioning.  Portions of slices 3, 4 and 5
+     are submitted for whole mount sectioning.  Representative sections
+     including areas of calcification are submitted as follows:
+     1     lateral margin, slice 1
+     2     unaffected breast parenchyma, lateral to area of calcifications,
+     inferior of slice 3
+     3, 4     anterior margin and suspicious microcalcifications, slice 4
+     5, 6     posterior margin and suspicious microcalcifications, slice 4
+     7, 8     possible suspicious calcifications, slice 5, including
+     anterior margin
+     9, 10     possible calcifications, slice 5, including anterior margin
+     11, 12     calcifications, slice 5, including posterior margin
+     13, 14     calcifications, slice 5, including posterior margin
+     15     superior margin, slice 5
+     16     inferior margin, slice 5
+     17  19     area with suspicious microcalcifications, including
+     posterior margin, slice 6
+     20  23     area with microcalcifications, slice 7
+     24     area with microcalcifications, slice 7
+     25     unaffected fatty tissue, upper inner quadrant, slice 11
+     26     unaffected breast parenchyma, lower inner quadrant, slice 11
+     27     unaffected breast parenchyma, upper inner quadrant, slice 12
+     28     unaffected breast parenchyma, lower inner quadrant, slice 12
+     29, 30     sections through medial margin, slice 14
+     IC  Dictated 11/19/2010
+     
+     
+     
+     
+     
+     Judit Zubovits, MD, FRCPC
+     Report Electronically Signed
+     2010/12/06 09:49",True,False,InsituDuctal,nonmass,nonmassB,6052,0.3996803862884468,12.995556108542328,0.00010000124066099712,1.23469925822585,5.1940688854953825,0.9060745860597995,-0.0005194133326282208,1.000888739049251,0.7465502980756258,4.0,0.18663757451890645,0.0,0.21664756067097524,1.0,0.21664756067097524,0.0007440227178171407,0.21664756067097524,2.1020364652800545,0.057695849907226204,0.00010000000042825981,0.5917451558476664,0.12127878040031433,110.2246014424312,-1.2127878091970259e-05,0.33357092680850714,1.2805608887508744,4.0,0.3201402221877186,0.0,0.5339208649805403,1.0,0.5339208649805403,0.008333636284721094,0.5339208649805403,435.75,2483.0,1013.9614047287901,77467.59246438683,0.9867505100686023,1.7085409349622052,1.1116170153918215,0.8926390758434066,0.13955091162016015,1.0,0.01418027017713839,0.8557354455193049,0.9674929571836238,-0.8481821287345312,0.9094943011224473,9949.385517848035,4.0,35002740.29722458,4.0,10593.76127320955,10650.497942386828,10545.86541005291,10545.86541005291,0.012703329522093982,0.013262135909241326,0.010232779464305706,0.0109010542258652,83.93302387267904,83.90672153635116,84.99104774535809,83.29332010582011,-0.0003843557214574941,0.002003881272959129,0.00013215145344889177,0.012417121976084295,0.0006870958776885774,0.0007100976401895972,0.0006862163949651358,0.0006884955628341884,0.026212352055948705,0.02664733150609225,0.026195497295370816,0.02623911152617136
