@@ -38,7 +38,7 @@ for fileline in file_ids:
     ###### Loading 
     print "Start by loading volumes..."
     # Get Root folder ( the directory of the script being run)
-    path_rootFolder = os.path.dirname(os.path.abspath(__file__)) 
+    path_rootFolder = 'Z:\Cristina\MassNonmass\mass'
     load = Inputs_init()
     [series_path, phases_series, lesionID_path] = load.readVolumes(path_rootFolder, StudyID, DicomExamNumber, SeriesID, Lesions_id)
     print "Path to series location: %s" % series_path 
@@ -53,7 +53,7 @@ for fileline in file_ids:
     
     print "\n Visualize volumes..."
     loadDisplay = Display()
-    lesion3D_mesh = loadDisplay.addSegment(lesion3D)
+    lesion3D_mesh = loadDisplay.addSegment(lesion3D, (0,1,0), interact=False)
     loadDisplay.visualize(load.DICOMImages, load.image_pos_pat, load.image_ori_pat, sub=True, postS=3, interact=True)
 
     ###### Extract Dynamic features
