@@ -77,6 +77,7 @@ class Morphology(object):
         pol2stenc.SetOutputOrigin(im.GetOrigin())
         pol2stenc.SetOutputSpacing(im.GetSpacing())
         pol2stenc.SetOutputWholeExtent(white_image.GetExtent())
+        pol2stenc.SetInformationInput(white_image)
         pol2stenc.Update()
          
         # cut the corresponding white image and set the background:
@@ -145,7 +146,7 @@ class Morphology(object):
             np_VOI_imagedata = np_VOI_imagedata.transpose(2,1,0)
             
             #################### HERE GET INTERNAL PIXELS IT AND MASK IT OUT
-            VOI_imagedata = np_VOI_imagedata[nonzero(np_VOI_mask)]    
+            VOI_imagedata = np_VOI_imagedata[nonzero(np_VOI_mask)]
     
             for j in range( len(VOI_imagedata) ):
                 pixValx = VOI_imagedata[j]

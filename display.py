@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 """
 Create visualization with standard vtk actors, renders, windowsn, interactors
 
@@ -459,3 +459,56 @@ class Display(object):
                             
         return
         
+    def addT2visualize(self, T2images, image_pos_pat, image_ori_pat, T2dims, T2spacing, interact):
+        
+        # Proceed to build reference frame for display objects based on DICOM coords   
+        [transformed_T2image, transform_cube] = self.dicomTransform(T2images, image_pos_pat, image_ori_pat)
+        # Set up ortogonal planes
+        self.xImagePlaneWidget.SetInput( transformed_T2image )
+        self.xImagePlaneWidget.SetSliceIndex(0)
+        self.yImagePlaneWidget.SetInput( transformed_T2image )
+        self.yImagePlaneWidget.SetSliceIndex(0)
+        self.zImagePlaneWidget.SetInput( transformed_T2image )
+        self.zImagePlaneWidget.SetSliceIndex(0)
+            
+        self.xImagePlaneWidget.UpdatePlacement()
+        self.yImagePlaneWidget.UpdatePlacement()
+        self.zImagePlaneWidget.UpdatePlacement()
+        
+        # Create a text property for both cube axes
+        tprop = vtk.vtkTextProperty()
+        tprop.SetColor(0, 1, 1)
+        tprop.ShadowOff()
+        
+        # Create a vtkCubeAxesActor2D.  Use the outer edges of the bounding box to
+        # draw the axes.  Add the actor to the renderer.
+        axesT2 = vtk.vtkCubeAxesActor2D()
+        axesT2.SetInput(transformed_T2image)
+        axesT2.SetCamera(self.renderer1.GetActiveCamera())
+        axesT2.SetLabelFormat("%6.4g")
+        axesT2.SetFlyModeToOuterEdges()
+        axesT2.SetFontFactor(1.2)
+        axesT2.SetAxisTitleTextProperty(tprop)
+        axesT2.SetAxisLabelTextProperty(tprop)      
+        self.renderer1.AddViewProp(axesT2)
+        
+        ############        
+        # bounds and initialize camera
+        bounds = transformed_T2image.GetBounds()
+        self.renderer1.ResetCamera(bounds)    
+        self.renderer1.ResetCameraClippingRange()
+        self.camera.SetViewUp(0.0,-1.0,0.0)
+        self.camera.Azimuth(315)
+        
+        # Initizalize
+        self.renWin1.Render()
+        self.renderer1.Render()
+        winLev=[0,0]
+        self.xImagePlaneWidget.GetWindowLevel(winLev)
+        print winLev
+        
+        if(interact==True):
+            self.iren1.Start()  
+            
+        
+        return

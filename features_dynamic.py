@@ -723,6 +723,3 @@ class Dynamic(object):
         pylab.legend()
         
         return self.dynamicEMM_inside
-
-                
-

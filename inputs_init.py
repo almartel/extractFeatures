@@ -35,6 +35,7 @@ import dicom
 import vtk
 import pandas as pd
 import subprocess
+from glob import glob
 
 #!/usr/bin/env python
 class Inputs_init:
@@ -46,9 +47,8 @@ class Inputs_init:
     
     """
     def __init__(self):
-        self.DICOMImages = []
-    
-    
+        self.DICOMImages = []          
+            
     def __call__(self):       
         """ Turn Class into a callable object """
         Inputs_init()
@@ -139,7 +139,7 @@ class Inputs_init:
 
         if not os.path.exists('DynPhases'):
             print '''SeriesPhases'''
-
+            
             # Get series to load
             series_path = path_rootFolder+os.sep+str(StudyID)+os.sep+str(DicomExamNumber)+os.sep+str(SeriesID)
             lesionID_path = series_path+os.sep+'VOIlesions_id'+str(Lesions_id)           
@@ -197,7 +197,53 @@ class Inputs_init:
         
         return(series_path, phases_series, lesionID_path)        
         
-    
+        
+    def readT2(self, path_T2Series):
+        """
+        ARGUMENTS:
+        =============
+        StudyID (str)           Study CAD patient number      
+        DicomExamNumber (str)   Imaging Study Number    
+        SeriesID  (str)         T2 Series number (e.g S600, S3)     
+        Lesions_id (str)        Older database LesionID identifier
+        
+        OUTPUTS:
+        =============
+        DICOMImages list(vtkImageData)      List of vtkImageData objects corresponding to dynamic series
+        
+        """
+        # Get total number of files and some DICOM tags needed fro DICOM coords
+        [len_listSeries_files, FileNms_slices_sorted_stack] = self.ReadDicomfiles(path_T2Series)
+        mostleft_slice = FileNms_slices_sorted_stack.slices[0]
+        
+        # Get dicom header, retrieve: image_pos_pat and image_ori_pat
+        dicomInfoT2 = dicom.read_file(path_T2Series+os.sep+str(mostleft_slice)) 
+        self.slice_thicknT2 = float(dicomInfoT2[0x0018,0x0050].value)  
+        
+        # Image Position (0020,0032): specifies the x, y, and z coordinates of the upper left hand corner of the image. This tag specifies the coordinates 
+        self.T2image_pos_pat = list(dicomInfoT2[0x0020,0x0032].value)
+        self.T2image_ori_pat = list(dicomInfoT2[0x0020,0x0037].value)
+        self.T2fatsat = dicomInfoT2[0x0019,0x10a4].value          
+       
+        os.chdir(path_T2Series)               
+        dicomReader  = vtk.vtkDICOMImageReader()
+        dicomReader.SetDirectoryName( path_T2Series )
+        dicomReader.Update()
+        
+        im = vtk.vtkImageData()
+        im =  dicomReader.GetOutput()
+        self.T2dims = im.GetDimensions()
+        self.T2spacing = im.GetSpacing()
+        
+        print "VTK Dimensions im.GetDimensions(): %d %d %d" % self.T2dims
+        print "VTK Spacing im.GetSpacing(): %f %f %f\n" % self.T2spacing
+        
+        # to objects image            
+        self.T2Images = im 
+        
+        return self.T2Images
+        
+        
     def loadSegmentation(self, lesionID_path):
         """
         ARGUMENTS:
