@@ -223,7 +223,7 @@ class Inputs_init:
         # Image Position (0020,0032): specifies the x, y, and z coordinates of the upper left hand corner of the image. This tag specifies the coordinates 
         self.T2image_pos_pat = list(dicomInfoT2[0x0020,0x0032].value)
         self.T2image_ori_pat = list(dicomInfoT2[0x0020,0x0037].value)
-        self.T2fatsat = dicomInfoT2[0x0019,0x10a4].value          
+        self.T2fatsat = dicomInfoT2[0x0019,0x10a4].value
        
         os.chdir(path_T2Series)               
         dicomReader  = vtk.vtkDICOMImageReader()

@@ -389,7 +389,7 @@ class Dynamic(object):
         ##################################################
         # orgamize into dataframe
         self.dynamicEMM_contour = DataFrame( data=array([[ self.amp, self.alpha, self.beta, self.iAUC1, self.Slope_ini, self.Tpeak, self.Kpeak, self.SER, self.maxCr, self.peakCr, self.UptakeRate, self.washoutRate, self.maxVr, self.peakVr, self.Vr_increasingRate, self.Vr_decreasingRate, self.Vr_post_1]]), 
-                                columns=['A.countor', 'alpha.countor', 'beta.countor', 'iAUC1.countor', 'Slope_ini.countor', 'Tpeak.countor', 'Kpeak.countor', 'SER.countor', 'maxCr.contour', 'peakCr.contour', 'UptakeRate.contour', 'washoutRate.contour', 'maxVr.contour', 'peakVr.contour','Vr_increasingRate.contour', 'Vr_decreasingRate.contour', 'Vr_post_1.contour'])
+                                columns=['A.contour', 'alpha.contour', 'beta.contour', 'iAUC1.contour', 'Slope_ini.contour', 'Tpeak.contour', 'Kpeak.contour', 'SER.contour', 'maxCr.contour', 'peakCr.contour', 'UptakeRate.contour', 'washoutRate.contour', 'maxVr.contour', 'peakVr.contour','Vr_increasingRate.contour', 'Vr_decreasingRate.contour', 'Vr_post_1.contour'])
 
         #############################################################
         # try to plot results
