@@ -235,7 +235,7 @@ class Display(object):
         
         return transformed_image, transform_cube   
         
-            
+        
     def addSegment(self, lesion3D, color, interact):        
         '''Add segmentation to current display'''
         # Set the planes based on seg bounds
@@ -582,10 +582,12 @@ class Display(object):
             coords_str = one_annot[one_annot.find("\\"):one_annot.find("',")]
             non_dec = re.compile(r'[^\d.]+')
             coords = non_dec.sub(',', coords_str).split(',')
-            annots_dict['xi']=int(coords[1])
-            annots_dict['yi']=int(coords[2])
-            annots_dict['xf']=int(coords[3])
-            annots_dict['yf']=int(coords[4])
+            print coords
+            if coords != ['']:
+                annots_dict['xi']=int(coords[1])
+                annots_dict['yi']=int(coords[2])
+                annots_dict['xf']=int(coords[3])
+                annots_dict['yf']=int(coords[4])
             
             # finish last attribute of annotations
             one_annot = one_annot[one_annot.find("',")+2:]
@@ -596,7 +598,7 @@ class Display(object):
         return annots_dict_list
         
     
-    def display_annot(self, images,  image_pos_pat, image_ori_pat, annots_dict_list):
+    def display_annot(self, images,  image_pos_pat, image_ori_pat, annots_dict_list, interact):
         '''Display list of annotations, put markers according to notes and color code according to sequence order'''
         # define image based on subtraction of postS -preS          
         image = images[4]            
@@ -606,81 +608,123 @@ class Display(object):
         
         color_list = [ [0,0,0], [1,0,0], [0,0,1], [0,1,1], [1,1,0], [1,0,1], [1,1,1], [0.5,0.5,0.5], [0.5,0.5,0],    [1,0.2,0], [1,1,0], [0,1,1],[0,1,0.6], [0,1,1], [1,0.4,0], [0.6,0,0.2], [1,1,0], [0,1,1],[0,1,0], [0,1,1], [1,0,0.1], [1,0.4,0],[0,1,1],[0,1,0], [0,1,1], [1,0,0.1], [1,0.4,0] ]
         a_count = 1
+        annot_pts_lbl = vtk.vtkPoints()
         for annots_dict in annots_dict_list:
-            print '\n=========#'+str(a_count)
-            print annots_dict            
-            ######################
-            ## Display in graphics
-            ######################
-            im_pt = [0,0,0]
-            ijk = [0,0,0]
-            pco = [0,0,0]
-            pi_2display=[0,0,0]
-            pf_2display=[0,0,0]
-            
-            # extract Slice locaton
-            pixId_sliceloc = self.transformed_image.FindPoint(self.origin[0], self.origin[1], float(annots_dict['SliceLocation']))
-            self.transformed_image.GetPoint(pixId_sliceloc, im_pt) 
-            io = self.transformed_image.ComputeStructuredCoordinates( im_pt, ijk, pco)
-            
-            # mark initial
-            print "Point init"
-            ijk[0] = int(annots_dict['xi'])
-            ijk[1] = int(annots_dict['yi'])
-            print ijk
-            annots_dict['pi_ijk']=ijk
-            pixId = self.transformed_image.ComputePointId(ijk)
-            pi_2display = self.transformed_image.GetPoint(pixId)
-            annots_dict['pi_2display']=pi_2display
-            print pi_2display
-            
-            # mark final
-            print "Point final"
-            ijk[0] = int(annots_dict['xf'])
-            ijk[1] = int(annots_dict['yf'])
-            print ijk
-            annots_dict['pf_ijk']=ijk
-            pixId = self.transformed_image.ComputePointId(ijk)
-            pf_2display = self.transformed_image.GetPoint(pixId)
-            annots_dict['pf_2display']=pf_2display
-            print pf_2display
-            
-            # Create a graphial line between the two points
-            annot_pts = vtk.vtkPoints()
-            annot_pts.InsertNextPoint(pi_2display)
-            annot_pts.InsertNextPoint(pf_2display)
-  
-            annot_ln = vtk.vtkLine()
-            annot_ln.GetPointIds().SetId(0,0)
-            annot_ln.GetPointIds().SetId(1,1)
-            note_lines = vtk.vtkCellArray()
-            note_lines.InsertNextCell(annot_ln)
-            
-            annot_poly = vtk.vtkPolyData()
-            annot_poly.SetPoints(annot_pts)
-            annot_poly.SetLines(note_lines)
-            annot_poly.Update()
-
-            # Create mappers and actors
-            annot_mapper_mesh = vtk.vtkPolyDataMapper()
-            annot_mapper_mesh.SetInput( annot_poly )
+            try:
+                float(annots_dict['SliceLocation'])
+                print '\n=========#'+str(a_count)
+                print annots_dict            
+                ######################
+                ## Display in graphics
+                ######################
+                im_pt = [0,0,0]
+                ijk = [0,0,0]
+                pco = [0,0,0]
+                pi_2display=[0,0,0]
+                pf_2display=[0,0,0]
+                
+                # extract Slice locaton
+                pixId_sliceloc = self.transformed_image.FindPoint(self.origin[0], self.origin[1], float(annots_dict['SliceLocation']))
+                self.transformed_image.GetPoint(pixId_sliceloc, im_pt) 
+                io = self.transformed_image.ComputeStructuredCoordinates( im_pt, ijk, pco)
+                
+                # mark initial
+                print "Point init"
+                ijk[0] = int(annots_dict['xi'])
+                ijk[1] = int(annots_dict['yi'])
+                print ijk
+                annots_dict['pi_ijk']=ijk
+                pixId = self.transformed_image.ComputePointId(ijk)
+                pi_2display = self.transformed_image.GetPoint(pixId)
+                annots_dict['pi_2display']=pi_2display
+                print pi_2display
+                
+                # mark final
+                print "Point final"
+                ijk[0] = int(annots_dict['xf'])
+                ijk[1] = int(annots_dict['yf'])
+                print ijk
+                annots_dict['pf_ijk']=ijk
+                pixId = self.transformed_image.ComputePointId(ijk)
+                pf_2display = self.transformed_image.GetPoint(pixId)
+                annots_dict['pf_2display']=pf_2display
+                print pf_2display
+                
+                # Create a graphial line between the two points
+                annot_pts = vtk.vtkPoints()
+                annot_pts.InsertNextPoint(pi_2display)
+                annot_pts.InsertNextPoint(pf_2display)
+      
+                annot_ln = vtk.vtkLine()
+                annot_ln.GetPointIds().SetId(0,0)
+                annot_ln.GetPointIds().SetId(1,1)
+                note_lines = vtk.vtkCellArray()
+                note_lines.InsertNextCell(annot_ln)
+                
+                annot_poly = vtk.vtkPolyData()
+                annot_poly.SetPoints(annot_pts)
+                annot_poly.SetLines(note_lines)
+                annot_poly.Update()
+    
+                # Create mappers and actors
+                annot_mapper_mesh = vtk.vtkPolyDataMapper()
+                annot_mapper_mesh.SetInput( annot_poly )
+                            
+                self.annot_actor = vtk.vtkActor()
+                self.annot_actor.SetMapper(annot_mapper_mesh)
+                self.annot_actor.GetProperty().SetColor(color_list[a_count])
+                self.annot_actor.GetProperty().SetLineWidth(3)
+                self.annot_actor.GetProperty().SetOpacity(0.6)
+                self.annot_actor.GetProperty().SetPointSize(7.0)
+                self.annot_actor.GetProperty().SetRepresentationToWireframe()
+                
+                ############
+                # Generate data arrays containing label ids
+                annot_pts_lbl.InsertNextPoint(pi_2display)
+                                   
+                # add annotation to scene
+                print annots_dict
+                self.renderer1.AddActor(self.annot_actor)
                         
-            self.annot_actor = vtk.vtkActor()
-            self.annot_actor.SetMapper(annot_mapper_mesh)
-            self.annot_actor.GetProperty().SetColor(color_list[a_count])
-            self.annot_actor.GetProperty().SetLineWidth(3)
-            self.annot_actor.GetProperty().SetOpacity(0.6)
-            self.annot_actor.GetProperty().SetPointSize(7.0)
-            self.annot_actor.GetProperty().SetRepresentationToWireframe()
-                                  
-            # add annotation to scene
-            print annots_dict
-            self.renderer1.AddActor(self.annot_actor)
-            # Initizalize
-            self.renWin1.Render()
-            self.renderer1.Render()
-            a_count +=1
- 
+                # Initizalize
+                self.renWin1.Render()
+                self.renderer1.Render()
+                a_count +=1
+            
+            except ValueError:
+                a_count +=1
+                annot_pts_lbl.InsertNextPoint([0,0,0])
+                pass
+            
+        ############
+        print annot_pts_lbl.GetNumberOfPoints()
+        annot_lbl_poly = vtk.vtkPolyData()
+        annot_lbl_poly.SetPoints(annot_pts_lbl)
+        annot_lbl_poly.Update()
+                
+        # Generate data arrays containing label ids                
+        ids = vtk.vtkIdFilter()
+        ids.SetInput(annot_lbl_poly)
+        ids.PointIdsOn()
+        ids.CellIdsOff()
+        
+        # Create labels for points
+        visPts = vtk.vtkSelectVisiblePoints()
+        visPts.SetInput(ids.GetOutput())
+        visPts.SetRenderer(self.renderer1)
+        visPts.SelectionWindowOff()
+        
+        # Create the mapper to display the point ids.  Specify the format to
+        # use for the labels.  Also create the associated actor.
+        ldm = vtk.vtkLabeledDataMapper()
+        ldm.SetInput(visPts.GetOutput())
+        ldm.SetLabelModeToLabelFieldData()
+        pointLabels = vtk.vtkActor2D()
+        pointLabels.SetMapper(ldm)
+                        
+        # initialize 
+        self.renderer1.AddActor2D(pointLabels)
+        
         print "\n====== Color codes:\n "
         print '\033[1;31m 1) Red '
         print '\033[1;34m 2) Blue '
@@ -690,7 +734,12 @@ class Display(object):
         print '\033[1;37m 6) White '
         print '\033[1;30m 7) Gray '
         print '\033[1;0m'
-    
+        
+        ############                
+        if(interact==True):
+            interactor = self.renWin1.GetInteractor()
+            interactor.Start()
+            
         return
         
         
@@ -705,7 +754,4 @@ class Display(object):
         axis_lenghts[2] = (l_bounds[5]-l_bounds[4])**2 
         
         return axis_lenghts
-        
-        
-        
         
