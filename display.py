@@ -51,7 +51,7 @@ import vtk
 from numpy import *
 import re
 import collections
-
+import math
 
 class Display(object):
     """
@@ -111,7 +111,11 @@ class Display(object):
         self.renderer1.SetBackground(0.0, 0.0, 0.0)
         self.iren1.SetPicker(self.picker)
                 
-        self.origin=[]
+        self.T1origin = [0,0,0]
+        self.T2origin = [0,0,0]
+        self.T2extent = [0,0,0,0,0,0]
+        self.T1extent = [0,0,0,0,0,0]
+        self.T1spacing = [0,0,0]
         
     def __call__(self):       
         """ Turn Class into a callable object """
@@ -405,15 +409,15 @@ class Display(object):
         self.dims = self.transformed_image.GetDimensions()
         print "Image Dimensions"
         print self.dims
-        (xMin, xMax, yMin, yMax, zMin, zMax) = self.transformed_image.GetWholeExtent()
-        print "Image Extension"
-        print xMin, xMax, yMin, yMax, zMin, zMax
-        self.spacing = self.transformed_image.GetSpacing()
+        self.T1spacing = self.transformed_image.GetSpacing()
         print "Image Spacing"
-        print self.spacing
-        self.origin = self.transformed_image.GetOrigin()
+        print self.T1spacing
+        self.T1origin = self.transformed_image.GetOrigin()
         print "Image Origin"
-        print self.origin
+        print self.T1origin
+        self.T1extent = list(self.transformed_image.GetWholeExtent())
+        print "Image Extent"
+        print self.T1extent
             
         # Set up ortogonal planes
         self.xImagePlaneWidget.SetInput( self.transformed_image )
@@ -507,6 +511,11 @@ class Display(object):
         # Proceed to build reference frame for display objects based on DICOM coords   
         [transformed_T2image, transform_cube] = self.dicomTransform(T2images, image_pos_pat, image_ori_pat)
         
+        self.T2origin = list(transformed_T2image.GetOrigin())
+        print "T2 Extent"
+        self.T2extent = list(transformed_T2image.GetExtent())
+        print self.T2extent        
+        
         # Set up ortogonal planes
         self.xImagePlaneWidget.SetInput( transformed_T2image )
         self.xImagePlaneWidget.SetSliceIndex(0)
@@ -542,6 +551,67 @@ class Display(object):
             interactor.Start()
             
         return
+        
+    def addT2transvisualize(self, T2images, image_pos_pat, image_ori_pat, T2dims, T2spacing, sideBreast, interact):
+        '''Added to build second reference frame and display T2 overlayed into T1 reference frame'''
+        # Proceed to build reference frame for display objects based on DICOM coords   
+        [transformed_T2image, transform_cube] = self.dicomTransform(T2images, image_pos_pat, image_ori_pat)
+        
+        #alignR = int(raw_input('\nAlign right? Yes:1 No:0 : '))
+        #if alignR:
+        if(sideBreast=="Right"):
+            zf1 = self.T1spacing[2]*self.T1extent[5] + self.T1origin[2]
+            self.T2origin[2] = zf1 - T2spacing[2]*self.T2extent[5] # this is z-span
+        else:
+            self.T2origin[2] = self.T1origin[2]
+        
+        # Change info origin
+        translated_T2image = vtk.vtkImageChangeInformation()
+        translated_T2image.SetInput( transformed_T2image )
+        translated_T2image.SetOutputOrigin(self.T2origin)
+        translated_T2image.Update()
+        
+        # Set up ortogonal planes
+        self.xImagePlaneWidget.SetInput( translated_T2image.GetOutput() )
+        self.xImagePlaneWidget.SetSliceIndex(0)
+        self.yImagePlaneWidget.SetInput( translated_T2image.GetOutput() )
+        self.yImagePlaneWidget.SetSliceIndex(0)
+        self.zImagePlaneWidget.SetInput( translated_T2image.GetOutput() )
+        self.zImagePlaneWidget.SetSliceIndex(0)
+                    
+        # Create a text property for both cube axes
+        tprop = vtk.vtkTextProperty()
+        tprop.SetColor(0.5, 0.5, 0)
+        tprop.ShadowOff()
+        
+        # Update the reneder window to receive new image !Important*****
+        self.renderer1.Modified()
+        self.renWin1.Modified()
+        
+        # Create a vtkCubeAxesActor2D.  Use the outer edges of the bounding box to
+        # draw the axes.  Add the actor to the renderer.
+        axesT2 = vtk.vtkCubeAxesActor2D()
+        axesT2.SetInput(translated_T2image.GetOutput())
+        axesT2.SetCamera(self.renderer1.GetActiveCamera())
+        axesT2.SetLabelFormat("%6.4g")
+        axesT2.SetFlyModeToOuterEdges()
+        axesT2.SetFontFactor(1.2)
+        axesT2.SetAxisTitleTextProperty(tprop)
+        axesT2.SetAxisLabelTextProperty(tprop)      
+        self.renderer1.AddViewProp(axesT2)
+        
+        ### Update T2Images
+        t_T2images = vtk.vtkImageChangeInformation()
+        t_T2images.SetInput( T2images )
+        t_T2images.SetOutputOrigin(self.T2origin)
+        t_T2images.Update()        
+
+        ############                
+        if(interact==True):
+            interactor = self.renWin1.GetInteractor()
+            interactor.Start()
+            
+        return 
         
         
     def extract_annot(self, list_annots):
@@ -584,10 +654,10 @@ class Display(object):
             coords = non_dec.sub(',', coords_str).split(',')
             print coords
             if coords != ['']:
-                annots_dict['xi']=int(coords[1])
-                annots_dict['yi']=int(coords[2])
-                annots_dict['xf']=int(coords[3])
-                annots_dict['yf']=int(coords[4])
+                annots_dict['xi']=float(coords[1])
+                annots_dict['yi']=float(coords[2])
+                annots_dict['xf']=float(coords[3])
+                annots_dict['yf']=float(coords[4])
             
             # finish last attribute of annotations
             one_annot = one_annot[one_annot.find("',")+2:]
@@ -606,7 +676,9 @@ class Display(object):
         # Proceed to build reference frame for display objects based on DICOM coords   
         [self.transformed_image, transform_cube] = self.dicomTransform(image, image_pos_pat, image_ori_pat)
         
-        color_list = [ [0,0,0], [1,0,0], [0,0,1], [0,1,1], [1,1,0], [1,0,1], [1,1,1], [0.5,0.5,0.5], [0.5,0.5,0],    [1,0.2,0], [1,1,0], [0,1,1],[0,1,0.6], [0,1,1], [1,0.4,0], [0.6,0,0.2], [1,1,0], [0,1,1],[0,1,0], [0,1,1], [1,0,0.1], [1,0.4,0],[0,1,1],[0,1,0], [0,1,1], [1,0,0.1], [1,0.4,0] ]
+        # supports 56 annotations
+        color_list = [ [0,0,0], [1,0,0], [0,0,1], [0,1,1], [1,1,0], [1,0,1], [1,1,1], [0.5,0.5,0.5], [0.5,0.5,0],    [1,0.2,0], [1,1,0], [0,1,1],[0,1,0.6], [0,1,1], [1,0.4,0], [0.6,0,0.2], [1,1,0], [0,1,1],[0,1,0], [0,1,1], [1,0,0.1], [1,0.4,0],[0,1,1],[0,1,0], [0,1,1], [1,0,0.1], [1,0.4,0], 
+                        [0,0,0], [1,0,0], [0,0,1], [0,1,1], [1,1,0], [1,0,1], [1,1,1], [0.5,0.5,0.5], [0.5,0.5,0],    [1,0.2,0], [1,1,0], [0,1,1],[0,1,0.6], [0,1,1], [1,0.4,0], [0.6,0,0.2], [1,1,0], [0,1,1],[0,1,0], [0,1,1], [1,0,0.1], [1,0.4,0],[0,1,1],[0,1,0], [0,1,1], [1,0,0.1], [1,0.4,0] ]
         a_count = 1
         annot_pts_lbl = vtk.vtkPoints()
         for annots_dict in annots_dict_list:
@@ -680,7 +752,7 @@ class Display(object):
                 
                 ############
                 # Generate data arrays containing label ids
-                annot_pts_lbl.InsertNextPoint(pi_2display)
+                annot_pts_lbl.InsertPoint(a_count, pi_2display)
                                    
                 # add annotation to scene
                 print annots_dict
@@ -693,7 +765,6 @@ class Display(object):
             
             except ValueError:
                 a_count +=1
-                annot_pts_lbl.InsertNextPoint([0,0,0])
                 pass
             
         ############

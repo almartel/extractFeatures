@@ -69,25 +69,20 @@ class Inputs_init:
             # Use all DICOM slices on series
             ''' EXTRACT DICOM SLICE LOCATION '''
             absp_fsID = str(abspath_PhaseID)+os.sep+listSeries_files[n]
-                    
-            if(absp_fsID!=str(abspath_PhaseID)+os.sep+'DIRCONTENTS.txt'):
-                dInfo = dicom.read_file(absp_fsID)
-                slices.append(dInfo.SliceLocation)
-                FileNms_slices.append(listSeries_files[n])
-            else:
-                cmd = 'rm '+str(abspath_PhaseID)+os.sep+'DIRCONTENTS.txt'
-                p1 = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE)
-                p1.wait()
-                len_listSeries_files = len_listSeries_files-1
+            dInfo = dicom.read_file(absp_fsID)
+            slices.append(dInfo.SliceLocation)
+            FileNms_slices.append(listSeries_files[n])
     
         print "Total images in series: %d " % len_listSeries_files
     
         '''\nPROCESS STACKS BY SLICE LOCATIONS '''
-        FileNms_slices_stack = pd.DataFrame({'slices': FileNms_slices,
+        slices_stack = pd.DataFrame({'slices': FileNms_slices,
                                              'location': slices})
-                
+        # sort
+        FileNms_slices_stack = slices_stack.sort(['location'], ascending=1)
+            
         return len_listSeries_files, FileNms_slices_stack
-
+    
         
     def readVolumes(self, path_rootFolder, StudyID, DicomExamNumber, SeriesID, Lesions_id):
         """
@@ -244,7 +239,7 @@ class Inputs_init:
         return self.T2Images
         
         
-    def loadSegmentation(self, lesionID_path):
+    def loadSegmentation(self, lesionID_path, lesionname):
         """
         ARGUMENTS:
         =============
@@ -255,10 +250,13 @@ class Inputs_init:
         lesion3D (vtkPolyData)      3D lesion segmentation as a vtkPolyData object       
         """ 
         # need to locate and read Lesion Seg
-        VOIlesion = 'VOIlesion_selected.vtk'
+        if(lesionname):
+            VOIlesion=' '
+        else:            
+            VOIlesion = os.sep+'VOIlesion_selected.vtk'
             
         lesion3D_reader = vtk.vtkPolyDataReader()
-        lesion3D_reader.SetFileName( lesionID_path+os.sep+VOIlesion )
+        lesion3D_reader.SetFileName( lesionID_path+VOIlesion )
         lesion3D_reader.Update()
         
         # Extract the polydata from the PolyDataReader        
