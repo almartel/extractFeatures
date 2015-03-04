@@ -215,7 +215,7 @@ class Morphology(object):
         # Extract features for sharpness of lesion margin, compute Margin gradient iii_var
         # The gradient is computed using convolution with a 3D sobel filter using scipy.ndimage.filters.sobel
         # The function generic_gradient_magnitude calculates a gradient magnitude using the function passed through derivative to calculate first derivatives. 
-        F_rmargin_0 =  array(Fmargin['Fmargin'+str(k)]).astype(float)
+        F_rmargin_0 =  array(Fmargin['Fmargin'+str(0)]).astype(float)
         self.iii_var_max = -1000
         iii_Sobelvar = []
         
@@ -336,7 +336,7 @@ class Morphology(object):
                 
                 r = array(VOIPnt)
                 rc = array(self.lesion_centroid)
-                norm_rdir = r-rc/linalg.norm(r-rc)
+                norm_rdir = (r-rc)/linalg.norm(r-rc)
                
                 # Find point for gradient vectors at the margin point
                 pixId = transformed_image.FindPoint(VOIPnt[0], VOIPnt[1], VOIPnt[2])
@@ -357,10 +357,11 @@ class Morphology(object):
                 #############
                 # Compute vector in the direction gradient at margin point
                 grad_marginpt = array([grad_pt])
+                norm_grad_marginpt = grad_marginpt/linalg.norm(grad_marginpt)
                 
                 # Compute dot product (unit vector for dot product)
-                p_dot = dot(grad_marginpt, norm_rdir)
-                norm_p_dot = linalg.norm(p_dot)
+                p_dot = dot(norm_grad_marginpt, norm_rdir)
+                norm_p_dot = np.abs(p_dot)[0] #linalg.norm(p_dot)
                 
                 H_norm_p.append(norm_p_dot)    
             
@@ -370,8 +371,11 @@ class Morphology(object):
                         
             # the histogram of the data with histtype='step'
             plt.figure()
-            n, bins, patches = plt.hist(array(H_norm_p), 50, normed=1, histtype='bar',facecolor='blue', alpha=0.75)
-            n, min_max, mean_bins, var_bins, skew, kurt = stats.describe(bins)
+            nsamples, bins, patches = plt.hist(array(H_norm_p), 50, normed=1, histtype='bar',facecolor='blue', alpha=0.75)
+            n, min_max, mean_bins, var_bins, skew, kurt = stats.describe(nsamples)
+            
+            mean_bins = np.mean(H_norm_p)
+            var_bins = np.var(H_norm_p)
             
             print("\n mean RGB: {0:8.6f}".format( mean_bins ))
             print("variance RGB: {0:8.6f}".format( var_bins ))

@@ -21,6 +21,8 @@ Class Instance Attributes:
 'image_pos_pat': ['145.059', '-167.095', '69.3364'], 
 'DICOMImages': list[(vtkImageData)
 'lesion3D_mesh': (vtkPolyData)
+
+Pandas version: pandas-0.12.0.win-amd64-py2.7
     
 Created on Wed Apr 02 13:42:50 2014
 
@@ -219,6 +221,7 @@ class Inputs_init:
         self.T2image_pos_pat = list(dicomInfoT2[0x0020,0x0032].value)
         self.T2image_ori_pat = list(dicomInfoT2[0x0020,0x0037].value)
         self.T2fatsat = dicomInfoT2[0x0019,0x10a4].value
+
        
         os.chdir(path_T2Series)               
         dicomReader  = vtk.vtkDICOMImageReader()

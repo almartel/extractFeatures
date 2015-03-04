@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Apr 02 09:40:11 2014
-
 @ author (C) Cristina Gallego, University of Toronto
 ----------------------------------------------------------------------
 """
@@ -96,8 +95,8 @@ class Texture(object):
             inorout = sub_pre_transformed_image.ComputeStructuredCoordinates( sub_pt, ijk, pco)
             print "coresponding ijk_vtk indices:"
             print ijk
-            ijk_vtk = ijk
-        
+            ijk_vtk = ijk            
+
             # compute texture cdf        
             eq_numpy_pre_VOI_imagedata, cdf = self.histeq(np_VOI_imagedata[:,:,int(ijk_vtk[2])])    
             plt.figure()
@@ -116,18 +115,19 @@ class Texture(object):
             plt.gray()
             
             # FInally display
-            plt.show()
-            
+            plt.show()            
+
             #****************************"
+            print "Normalizing data..."
+            np_VOI_imagedataflat = np_VOI_imagedata.flatten().astype(float)
+            np_VOI_imagedata_num = (np_VOI_imagedataflat-min(np_VOI_imagedataflat))
+            np_VOI_imagedata_den = (max(np_VOI_imagedataflat)-min(np_VOI_imagedataflat))
+            np_VOI_imagedata_flatten = 255*(np_VOI_imagedata_num/np_VOI_imagedata_den)
+            np_VOI_imagedata = np_VOI_imagedata_flatten.reshape(dims[0], dims[1], dims[2])
+            print np_VOI_imagedata
+            
             # Do histogram cast
-            if( np_VOI_imagedata.max() > 256):
-                # Do only VOI histo equ
-                np_VOI_imagedata = np_VOI_imagedata.astype('uint8')
-                eq_numpy_pre_VOI_imagedata, cdf = self.histeq(np_VOI_imagedata[:,:,int(ijk_vtk[2])])
-            else:
-                # Do only VOI histo equ
-                np_VOI_imagedata = np_VOI_imagedata.astype('uint8')
-                eq_numpy_pre_VOI_imagedata, cdf = self.histeq(np_VOI_imagedata[:,:,int(ijk_vtk[2])])
+            eq_numpy_pre_VOI_imagedata, cdf = self.histeq(np_VOI_imagedata[:,:,int(ijk_vtk[2])])
             
             
             # Get the shape of the numpy image data to confirm dimensions
@@ -142,14 +142,7 @@ class Texture(object):
                     int(ijk_vtk[0] - lesion_radius):int(ijk_vtk[0] + lesion_radius),
                     int(ijk_vtk[1] - lesion_radius):int(ijk_vtk[1] + lesion_radius),
                     int(ijk_vtk[2])]
-            
-            patches_shape = lesion_patches.shape
-                                
-            for k in range(patches_shape[0]):
-                for l in range(patches_shape[1]):
-                    if (lesion_patches[k,l] < 0):
-                        lesion_patches[k,l] = 0
-            
+                                    
             print '\n Lesion_patches:'
             print lesion_patches
     
@@ -233,7 +226,3 @@ class Texture(object):
 
 
         return self.texture_features
-            
-            
-    
-    

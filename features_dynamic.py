@@ -133,7 +133,7 @@ class Dynamic(object):
             
             # find mapping to Dicom space  
             [transformed_image, transform_cube] = Display().dicomTransform(DICOMImages[i], image_pos_pat, image_ori_pat)
-        
+ 
             for j in range( VOI_mesh.GetNumberOfPoints() ):
                 VOI_mesh.GetPoint(j, VOIPnt)      
                 
@@ -302,11 +302,12 @@ class Dynamic(object):
         So = array(deltaS['delta0']).astype(float)
         Crk = {'Cr0': mean(So)}  
         C = {}
-        Carray = []
         
         for k in range(1,len(DICOMImages)):
             Sk = array(deltaS['delta'+str(k)]).astype(float)
+            print Sk
             Cr = 0
+            Carray = []
             for j in range( len(So) ):
                 # extract average enhancement over the lesion at each time point
                 Cr = Cr + (Sk[j] - So[j])/So[j]
@@ -314,7 +315,7 @@ class Dynamic(object):
                 
             # compile
             C['C'+str(k)] = Carray
-            Crk['Cr'+str(k)] = Cr/len(Sk)
+            Crk['Cr'+str(k)] = float(Cr/len(Sk))
         
         # Extract Fii_1
         for k in range(1,5):
