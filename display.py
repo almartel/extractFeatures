@@ -140,9 +140,9 @@ class Display(object):
         # If one considers the localizer plane as a "viewport" onto the DICOM 3D coordinate space, then that viewport is described by its origin, its row unit vector, column unit vector and a normal unit vector (derived from the row and column vectors by taking the cross product). Now if one moves the origin to 0,0,0 and rotates this viewing plane such that the row vector is in the +X direction, the column vector the +Y direction, and the normal in the +Z direction, then one has a situation where the X coordinate now represents a column offset in mm from the localizer's top left hand corner, and the Y coordinate now represents a row offset in mm from the localizer's top left hand corner, and the Z coordinate can be ignored. One can then convert the X and Y mm offsets into pixel offsets using the pixel spacing of the localizer imag
         # Initialize Image orienation
         "Image Orientation Patient Matrix"
-        IO = matrix(    [[0, 0,-1, 1],
-                [1, 0, 0, 1],
-                [0,-1, 0, 1],
+        IO = matrix(    [[0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
                 [0, 0, 0, 1]])
         # Assign the 6-Image orientation patient coordinates (from Dicomtags)
         IO[0,0] = image_ori_pat[0]; IO[0,1] = image_ori_pat[1]; IO[0,2] = image_ori_pat[2]; 
@@ -158,10 +158,14 @@ class Display(object):
         
         IP =  array([0, 0, 0, 1]) # Initialization Image Position
         IP[0] = image_pos_pat[0]; IP[1] = image_pos_pat[1]; IP[2] = image_pos_pat[2];  
-        IO[0,3] = -image_pos_pat[0]; IO[1,3] = -image_pos_pat[1]; IO[2,3] = -image_pos_pat[2]
+        IO[0,3] = image_pos_pat[0]; IO[1,3] = image_pos_pat[1]; IO[2,3] = image_pos_pat[2]
                
-        "Compute Volume Origin"
+        print "Compute: Position, Orientation, matrix, & Volume Origin"
+        print image_pos_pat
+        print image_ori_pat
+        print IO
         origin = IP*IO.I
+        print origin[0,0], origin[0,1], origin[0,2]
         
         # Create matrix 4x4
         DICOM_mat = vtk.vtkMatrix4x4();
@@ -239,7 +243,64 @@ class Display(object):
         
         return transformed_image, transform_cube   
         
+    def mhaTransform(self, image, image_pos_pat, image_ori_pat):
+        """ mhaTransform: transforms an image from mha coordinate frame"""
+        "Image Orientation Patient Matrix"
+        IO = matrix(    [[0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 1]])
+        # Assign the 6-Image orientation patient coordinates (from Dicomtags)
+        IO[0,0] = image_ori_pat[0]; IO[0,1] = image_ori_pat[1]; IO[0,2] = image_ori_pat[2]; 
+        IO[1,0] = image_ori_pat[3]; IO[1,1] = image_ori_pat[4]; IO[1,2] = image_ori_pat[5]; 
         
+        # obtain thrid column as the cross product of column 1 y 2
+        IO_col1 = [image_ori_pat[0], image_ori_pat[1], image_ori_pat[2]]
+        IO_col2 = [image_ori_pat[3], image_ori_pat[4], image_ori_pat[5]]
+        IO_col3 = cross(IO_col1, IO_col2)
+        
+        # assign column 3    
+        IO[2,0] = IO_col3[0]; IO[2,1] = IO_col3[1]; IO[2,2] = IO_col3[2]; 
+        
+        IP =  array([0, 0, 0, 1]) # Initialization Image Position
+        IP[0] = image_pos_pat[0]; IP[1] = image_pos_pat[1]; IP[2] = image_pos_pat[2];  
+        IO[0,3] = image_pos_pat[0]; IO[1,3] = image_pos_pat[1]; IO[2,3] = image_pos_pat[2]
+               
+        print "Compute: Position, Orientation, matrix, & Volume Origin"
+        print image_pos_pat
+        print image_ori_pat
+        print IO
+        origin = IP*IO.I
+        print origin[0,0], origin[0,1], origin[0,2]
+        
+        # Change info
+        # No need to Flip along Y-Z-axis like form DICOM          
+        # Change info origin
+        origin_image = vtk.vtkImageChangeInformation()
+        origin_image.SetInput( image )
+        origin_image.SetOutputOrigin(origin[0,0], origin[0,1], origin[0,2])
+        origin_image.Update()
+        
+        transformed_image = origin_image.GetOutput()
+        
+        transformed_image.UpdateInformation()
+        self.T2dims = transformed_image.GetDimensions()
+        print "Image Dimensions"
+        print self.T2dims
+        (xMin, xMax, yMin, yMax, zMin, zMax) = transformed_image.GetWholeExtent()
+        print "Image Extension"
+        print xMin, xMax, yMin, yMax, zMin, zMax
+        self.T2spacing = transformed_image.GetSpacing()
+        print "Image Spacing"
+        print self.T2spacing
+        self.T2origin = transformed_image.GetOrigin()
+        print "Image Origin"
+        print self.T2origin
+        
+        return transformed_image 
+        
+        
+          
     def addSegment(self, lesion3D, color, interact):        
         '''Add segmentation to current display'''
         # Set the planes based on seg bounds
@@ -308,6 +369,7 @@ class Display(object):
         
         if(interact==True):
             self.iren1.Start()
+            
                 
         return 
         
@@ -612,7 +674,59 @@ class Display(object):
             interactor.Start()
             
         return 
+
         
+    def visualizemha(self, fixed_path, moving_path, image_pos_pat, image_ori_pat, interact):
+        '''Display and render volumes, reference frames, actors and widgets'''  
+             
+        # Proceed to build reference frame for display objects based on DICOM coords   
+        mhareader = vtk.vtkMetaImageReader()
+        mhareader.SetFileName(moving_path)
+        mhareader.Update()
+        
+        self.warpT2_mha = self.mhaTransform(mhareader.GetOutput(), image_pos_pat, image_ori_pat)
+        
+        self.T2origin = list(self.warpT2_mha.GetOrigin())
+        print "T2 Extent"
+        self.T2extent = list(self.warpT2_mha.GetExtent())
+        print self.T2extent        
+
+        # Initizalize
+        self.xImagePlaneWidget.Modified()
+        self.yImagePlaneWidget.Modified()
+        self.zImagePlaneWidget.Modified()
+                
+        # Set up ortogonal planes
+        self.xImagePlaneWidget.SetInput(self.warpT2_mha )
+        self.xImagePlaneWidget.SetSliceIndex(0)
+        self.yImagePlaneWidget.SetInput(self.warpT2_mha )
+        self.yImagePlaneWidget.SetSliceIndex(0)
+        self.zImagePlaneWidget.SetInput( self.warpT2_mha )
+        self.zImagePlaneWidget.SetSliceIndex(0)
+                    
+        # Create a text property for both cube axes
+        tprop = vtk.vtkTextProperty()
+        tprop.SetColor(0.5, 0.5, 0)
+        tprop.ShadowOff()
+    
+        # Create a vtkCubeAxesActor2D.  Use the outer edges of the bounding box to
+        # draw the axes.  Add the actor to the renderer.
+        axesT2 = vtk.vtkCubeAxesActor2D()
+        axesT2.SetInput(self.warpT2_mha)
+        axesT2.SetCamera(self.renderer1.GetActiveCamera())
+        axesT2.SetLabelFormat("%6.4g")
+        axesT2.SetFlyModeToOuterEdges()
+        axesT2.SetFontFactor(1.2)
+        axesT2.SetAxisTitleTextProperty(tprop)
+        axesT2.SetAxisLabelTextProperty(tprop)      
+        self.renderer1.AddViewProp(axesT2)     
+        
+        if(interact==True):
+            interactor = self.renWin1.GetInteractor()
+            interactor.Start()     
+                            
+        return
+
         
     def extract_annot(self, list_annots):
         '''Parse list of annotations, put markers according to notes and color code according to sequence order'''

@@ -522,8 +522,10 @@ def ReadDicomfiles(abspath_PhaseID):
     '''\nPROCESS STACKS BY SLICE LOCATIONS '''
     FileNms_slices_stack = pd.DataFrame({'slices': FileNms_slices,
                                          'location': slices})
-            
-    return len_listSeries_files, FileNms_slices_stack
+    
+    sorted_FileNms_slices_stack = FileNms_slices_stack.sort('location', ascending=1)        
+    
+    return len_listSeries_files, sorted_FileNms_slices_stack
     
 ## END
 

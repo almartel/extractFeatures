@@ -78,12 +78,12 @@ class Inputs_init:
         print "Total images in series: %d " % len_listSeries_files
     
         '''\nPROCESS STACKS BY SLICE LOCATIONS '''
-        slices_stack = pd.DataFrame({'slices': FileNms_slices,
+        FileNms_slices_stack = pd.DataFrame({'slices': FileNms_slices,
                                              'location': slices})
-        # sort
-        FileNms_slices_stack = slices_stack.sort(['location'], ascending=1)
-            
-        return len_listSeries_files, FileNms_slices_stack
+        
+        sorted_FileNms_slices_stack = FileNms_slices_stack.sort('location', ascending=1)        
+        
+        return len_listSeries_files, sorted_FileNms_slices_stack
     
         
     def readVolumes(self, path_rootFolder, StudyID, DicomExamNumber, SeriesID, Lesions_id):
@@ -139,8 +139,8 @@ class Inputs_init:
             
             # Get series to load
             series_path = path_rootFolder+os.sep+str(StudyID)+os.sep+str(DicomExamNumber)+os.sep+str(SeriesID)
-            lesionID_path = series_path+os.sep+'VOIlesions_id'+str(Lesions_id)           
-                                                        
+            lesionID_path = series_path+os.sep+'VOIlesions_id'+str(Lesions_id)    
+                                                       
             # process all Volumes when in stacks of Dyn Volumes
             if os.path.exists(series_path+os.sep+'pre-Contrast'):
                 phases_series = []
@@ -153,8 +153,12 @@ class Inputs_init:
         # Get total number of files and some DICOM tags needed fro DICOM coords
         pre_abspath_PhaseID = series_path+os.sep+phases_series[0]
         [len_listSeries_files, FileNms_slices_sorted_stack] = self.ReadDicomfiles(pre_abspath_PhaseID)
-        mostleft_slice = FileNms_slices_sorted_stack.slices[0]
-        
+        print FileNms_slices_sorted_stack[::2]
+        mostleft_slice = FileNms_slices_sorted_stack.iloc[0]['slices']
+        neworigen = FileNms_slices_sorted_stack.iloc[0]['location']
+        oldorigen = FileNms_slices_sorted_stack.location[0]
+        self.readjust_origin = neworigen-oldorigen
+                
         # Get dicom header, retrieve: image_pos_pat and image_ori_pat
         dicomInfo_series = dicom.read_file(pre_abspath_PhaseID+os.sep+str(mostleft_slice)) 
         self.slice_thickn = float(dicomInfo_series[0x0018,0x0050].value)  
@@ -191,6 +195,7 @@ class Inputs_init:
             # Append to objects image            
             self.DICOMImages.append( im )
             
+        lesionID_path = 'C:'+os.sep+'Users'+os.sep+'windows'+os.sep+'Documents'+os.sep+'repoCode-local'+os.sep+'registerT2andfeatures'+os.sep+'segmentations'
         
         return(series_path, phases_series, lesionID_path)        
         
@@ -211,7 +216,7 @@ class Inputs_init:
         """
         # Get total number of files and some DICOM tags needed fro DICOM coords
         [len_listSeries_files, FileNms_slices_sorted_stack] = self.ReadDicomfiles(path_T2Series)
-        mostleft_slice = FileNms_slices_sorted_stack.slices[0]
+        mostleft_slice = FileNms_slices_sorted_stack.iloc[0]['slices']
         
         # Get dicom header, retrieve: image_pos_pat and image_ori_pat
         dicomInfoT2 = dicom.read_file(path_T2Series+os.sep+str(mostleft_slice)) 
@@ -221,7 +226,6 @@ class Inputs_init:
         self.T2image_pos_pat = list(dicomInfoT2[0x0020,0x0032].value)
         self.T2image_ori_pat = list(dicomInfoT2[0x0020,0x0037].value)
         self.T2fatsat = dicomInfoT2[0x0019,0x10a4].value
-
        
         os.chdir(path_T2Series)               
         dicomReader  = vtk.vtkDICOMImageReader()
@@ -254,16 +258,27 @@ class Inputs_init:
         """ 
         # need to locate and read Lesion Seg
         if(lesionname):
-            VOIlesion=' '
+            VOIlesion=lesionname
         else:            
             VOIlesion = os.sep+'VOIlesion_selected.vtk'
             
         lesion3D_reader = vtk.vtkPolyDataReader()
-        lesion3D_reader.SetFileName( lesionID_path+VOIlesion )
+        lesion3D_reader.SetFileName( lesionID_path+os.sep+VOIlesion )
         lesion3D_reader.Update()
         
+        # Translate by adjusting origin
+        translation = vtk.vtkTransform()
+        translation.Translate(0, 0, self.readjust_origin)
+        translation.Update()
+        
+        adjust_pos = vtk.vtkTransformPolyDataFilter()
+        adjust_pos.SetInput(lesion3D_reader.GetOutput())
+        adjust_pos.SetTransform(translation)
+        adjust_pos.Update()
+        
+
         # Extract the polydata from the PolyDataReader        
-        self.lesion3D_mesh = lesion3D_reader.GetOutput()
+        self.lesion3D_mesh = adjust_pos.GetOutput()
       
         return self.lesion3D_mesh
         
