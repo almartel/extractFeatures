@@ -153,11 +153,8 @@ class Inputs_init:
         # Get total number of files and some DICOM tags needed fro DICOM coords
         pre_abspath_PhaseID = series_path+os.sep+phases_series[0]
         [len_listSeries_files, FileNms_slices_sorted_stack] = self.ReadDicomfiles(pre_abspath_PhaseID)
-        print FileNms_slices_sorted_stack[::2]
-        mostleft_slice = FileNms_slices_sorted_stack.iloc[0]['slices']
-        neworigen = FileNms_slices_sorted_stack.iloc[0]['location']
-        oldorigen = FileNms_slices_sorted_stack.location[0]
-        self.readjust_origin = neworigen-oldorigen
+        mostleft_slice = FileNms_slices_sorted_stack.iloc[0]['slices'] 
+        self.neworigen = FileNms_slices_sorted_stack.iloc[0]['location']
                 
         # Get dicom header, retrieve: image_pos_pat and image_ori_pat
         dicomInfo_series = dicom.read_file(pre_abspath_PhaseID+os.sep+str(mostleft_slice)) 
@@ -266,19 +263,8 @@ class Inputs_init:
         lesion3D_reader.SetFileName( lesionID_path+os.sep+VOIlesion )
         lesion3D_reader.Update()
         
-        # Translate by adjusting origin
-        translation = vtk.vtkTransform()
-        translation.Translate(0, 0, self.readjust_origin)
-        translation.Update()
-        
-        adjust_pos = vtk.vtkTransformPolyDataFilter()
-        adjust_pos.SetInput(lesion3D_reader.GetOutput())
-        adjust_pos.SetTransform(translation)
-        adjust_pos.Update()
-        
-
         # Extract the polydata from the PolyDataReader        
-        self.lesion3D_mesh = adjust_pos.GetOutput()
+        self.lesion3D_mesh = lesion3D_reader.GetOutput()
       
         return self.lesion3D_mesh
         

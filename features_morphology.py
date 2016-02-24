@@ -370,9 +370,9 @@ class Morphology(object):
             # first create a single histogram
                         
             # the histogram of the data with histtype='step'
-            plt.figure()
-            nsamples, bins, patches = plt.hist(array(H_norm_p), 50, normed=1, histtype='bar',facecolor='blue', alpha=0.75)
-            n, min_max, mean_bins, var_bins, skew, kurt = stats.describe(nsamples)
+#            plt.figure()
+#            nsamples, bins, patches = plt.hist(array(H_norm_p), 50, normed=1, histtype='bar',facecolor='blue', alpha=0.75)
+#           n, min_max, mean_bins, var_bins, skew, kurt = stats.describe(nsamples)
             
             mean_bins = np.mean(H_norm_p)
             var_bins = np.var(H_norm_p)

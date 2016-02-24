@@ -676,12 +676,12 @@ class Display(object):
         return 
 
         
-    def visualizemha(self, fixed_path, moving_path, image_pos_pat, image_ori_pat, interact):
+    def visualizemha(self, img_path, image_pos_pat, image_ori_pat, interact):
         '''Display and render volumes, reference frames, actors and widgets'''  
              
         # Proceed to build reference frame for display objects based on DICOM coords   
         mhareader = vtk.vtkMetaImageReader()
-        mhareader.SetFileName(moving_path)
+        mhareader.SetFileName(img_path)
         mhareader.Update()
         
         self.warpT2_mha = self.mhaTransform(mhareader.GetOutput(), image_pos_pat, image_ori_pat)
