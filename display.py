@@ -210,28 +210,27 @@ class Display(object):
         # Flip along Y-Z-axis: VTK uses computer graphics convention where the first pixel in memory is shown 
         # in the lower left of the displayed image.
         flipZ_image = vtk.vtkImageFlip()
-        flipZ_image.SetInput(image)
+        flipZ_image.SetInputData(image)
         flipZ_image.SetFilteredAxis(2)
         flipZ_image.Update() 
         
         flipY_image = vtk.vtkImageFlip()
-        flipY_image.SetInput(flipZ_image.GetOutput())
+        flipY_image.SetInputData(flipZ_image.GetOutput())
         flipY_image.SetFilteredAxis(1)
         flipY_image.Update() 
           
         # Change info origin
         flipY_origin_image = vtk.vtkImageChangeInformation()
-        flipY_origin_image.SetInput( flipY_image.GetOutput() );
+        flipY_origin_image.SetInputData( flipY_image.GetOutput() );
         flipY_origin_image.SetOutputOrigin(origin[0,0], origin[0,1], origin[0,2])
         flipY_origin_image.Update()
         
         transformed_image = flipY_origin_image.GetOutput()
         
-        transformed_image.UpdateInformation()
         self.dims = transformed_image.GetDimensions()
         print "Image Dimensions"
         print self.dims
-        (xMin, xMax, yMin, yMax, zMin, zMax) = transformed_image.GetWholeExtent()
+        (xMin, xMax, yMin, yMax, zMin, zMax) = transformed_image.GetExtent()
         print "Image Extension"
         print xMin, xMax, yMin, yMax, zMin, zMax
         self.spacing = transformed_image.GetSpacing()
@@ -277,17 +276,15 @@ class Display(object):
         # No need to Flip along Y-Z-axis like form DICOM          
         # Change info origin
         origin_image = vtk.vtkImageChangeInformation()
-        origin_image.SetInput( image )
+        origin_image.SetInputData( image )
         origin_image.SetOutputOrigin(origin[0,0], origin[0,1], origin[0,2])
         origin_image.Update()
         
         transformed_image = origin_image.GetOutput()
-        
-        transformed_image.UpdateInformation()
         self.T2dims = transformed_image.GetDimensions()
         print "Image Dimensions"
         print self.T2dims
-        (xMin, xMax, yMin, yMax, zMin, zMax) = transformed_image.GetWholeExtent()
+        (xMin, xMax, yMin, yMax, zMin, zMax) = transformed_image.GetExtent()
         print "Image Extension"
         print xMin, xMax, yMin, yMax, zMin, zMax
         self.T2spacing = transformed_image.GetSpacing()
@@ -301,7 +298,7 @@ class Display(object):
         
         
           
-    def addSegment(self, lesion3D, color, interact):        
+    def addSegment(self, lesion3D, color, interact=False):        
         '''Add segmentation to current display'''
         # Set the planes based on seg bounds
         self.lesion_bounds = lesion3D.GetBounds()
@@ -316,7 +313,7 @@ class Display(object):
         
         # get VOI volume
         VOI_massProperty = vtk.vtkMassProperties()
-        VOI_massProperty.SetInput(lesion3D)
+        VOI_massProperty.SetInputData(lesion3D)
         VOI_massProperty.Update()
                
         # VTK is unitless. The units you get out are the units you put in.
@@ -335,7 +332,7 @@ class Display(object):
         print "VOI_efect_diameter = ", self.VOI_efect_diameter
             
         centerOfMassFilter = vtk.vtkCenterOfMass()
-        centerOfMassFilter.SetInput( lesion3D )
+        centerOfMassFilter.SetInputData( lesion3D )
         centerOfMassFilter.SetUseScalarsAsWeights(False)
         centerOfMassFilter.Update()
         
@@ -346,7 +343,7 @@ class Display(object):
                 
         # Add ICPinit_mesh.vtk to the render
         self.mapper_mesh = vtk.vtkPolyDataMapper()
-        self.mapper_mesh.SetInput( lesion3D )
+        self.mapper_mesh.SetInputData( lesion3D )
         self.mapper_mesh.ScalarVisibilityOff()
         
         self.actor_mesh = vtk.vtkActor()
@@ -378,8 +375,8 @@ class Display(object):
         '''subtract volumes based on indicated postS'''
         sub_preMat = vtk.vtkImageMathematics()
         sub_preMat.SetOperationToSubtract()
-        sub_preMat.SetInput1(Images2Sub[timep])
-        sub_preMat.SetInput2(Images2Sub[0])
+        sub_preMat.SetInput1Data(Images2Sub[timep])
+        sub_preMat.SetInput2Data(Images2Sub[0])
         sub_preMat.Update()
                     
         sub_pre = vtk.vtkImageData()
@@ -399,13 +396,11 @@ class Display(object):
         # Proceed to build reference frame for display objects based on DICOM coords   
         [transformed_image, transform_cube] = self.dicomTransform(image, image_pos_pat, image_ori_pat)
                 
-        # Calculate the center of the volume
-        transformed_image.UpdateInformation() 
-    
+        # Calculate the center of the volume    
         # Set up ortogonal planes
-        self.xImagePlaneWidget.SetInput( transformed_image )
-        self.yImagePlaneWidget.SetInput( transformed_image )
-        self.zImagePlaneWidget.SetInput( transformed_image )
+        self.xImagePlaneWidget.SetInputData( transformed_image )
+        self.yImagePlaneWidget.SetInputData( transformed_image )
+        self.zImagePlaneWidget.SetInputData( transformed_image )
         
         self.zImagePlaneWidget.SetSliceIndex( LesionZslice )
         self.xImagePlaneWidget.On()
@@ -454,7 +449,7 @@ class Display(object):
         return 
       
       
-    def visualize(self, images, image_pos_pat, image_ori_pat, sub, postS, interact):
+    def visualize(self, images, image_pos_pat, image_ori_pat, sub, postS, interact=True):
         '''Display and render volumes, reference frames, actors and widgets'''
         if(sub):
             #subtract volumes based on indicated postS            
@@ -467,7 +462,6 @@ class Display(object):
         [self.transformed_image, transform_cube] = self.dicomTransform(image, image_pos_pat, image_ori_pat)
         
         # get info from image before visualization
-        self.transformed_image.UpdateInformation()
         self.dims = self.transformed_image.GetDimensions()
         print "Image Dimensions"
         print self.dims
@@ -477,18 +471,18 @@ class Display(object):
         self.T1origin = self.transformed_image.GetOrigin()
         print "Image Origin"
         print self.T1origin
-        self.T1extent = list(self.transformed_image.GetWholeExtent())
+        self.T1extent = list(self.transformed_image.GetExtent())
         print "Image Extent"
         print self.T1extent
             
         # Set up ortogonal planes
-        self.xImagePlaneWidget.SetInput( self.transformed_image )
+        self.xImagePlaneWidget.SetInputData( self.transformed_image )
         self.xImagePlaneWidget.SetPlaneOrientationToXAxes()
         self.xImagePlaneWidget.SetSliceIndex(0)
-        self.yImagePlaneWidget.SetInput( self.transformed_image )
+        self.yImagePlaneWidget.SetInputData( self.transformed_image )
         self.yImagePlaneWidget.SetPlaneOrientationToYAxes()
         self.yImagePlaneWidget.SetSliceIndex(0)
-        self.zImagePlaneWidget.SetInput( self.transformed_image )
+        self.zImagePlaneWidget.SetInputData( self.transformed_image )
         self.zImagePlaneWidget.SetPlaneOrientationToZAxes()
         self.zImagePlaneWidget.SetSliceIndex(0)
             
@@ -540,7 +534,7 @@ class Display(object):
         # Create a vtkCubeAxesActor2D.  Use the outer edges of the bounding box to
         # draw the axes.  Add the actor to the renderer.
         axes = vtk.vtkCubeAxesActor2D()
-        axes.SetInput(self.transformed_image)
+        axes.SetInputData(self.transformed_image)
         axes.SetCamera(self.renderer1.GetActiveCamera())
         axes.SetLabelFormat("%6.4g")
         axes.SetFlyModeToOuterEdges()
@@ -579,11 +573,11 @@ class Display(object):
         print self.T2extent        
         
         # Set up ortogonal planes
-        self.xImagePlaneWidget.SetInput( self.transformed_T2image )
+        self.xImagePlaneWidget.SetInputData( self.transformed_T2image )
         self.xImagePlaneWidget.SetSliceIndex(0)
-        self.yImagePlaneWidget.SetInput( self.transformed_T2image )
+        self.yImagePlaneWidget.SetInputData( self.transformed_T2image )
         self.yImagePlaneWidget.SetSliceIndex(0)
-        self.zImagePlaneWidget.SetInput( self.transformed_T2image )
+        self.zImagePlaneWidget.SetInputData( self.transformed_T2image )
         self.zImagePlaneWidget.SetSliceIndex(0)
                     
         # Create a text property for both cube axes
@@ -598,7 +592,7 @@ class Display(object):
         # Create a vtkCubeAxesActor2D.  Use the outer edges of the bounding box to
         # draw the axes.  Add the actor to the renderer.
         axesT2 = vtk.vtkCubeAxesActor2D()
-        axesT2.SetInput(self.transformed_T2image)
+        axesT2.SetInputData(self.transformed_T2image)
         axesT2.SetCamera(self.renderer1.GetActiveCamera())
         axesT2.SetLabelFormat("%6.4g")
         axesT2.SetFlyModeToOuterEdges()
@@ -633,18 +627,18 @@ class Display(object):
                 
         # Change info origin
         transformedInfo_T2image = vtk.vtkImageChangeInformation()
-        transformedInfo_T2image.SetInput( transformed_T2image )
+        transformedInfo_T2image.SetInputData( transformed_T2image )
         transformedInfo_T2image.SetOutputOrigin(self.T2origin)
         transformedInfo_T2image.Update()
         
         self.transformed_T2image = transformedInfo_T2image.GetOutput()
         
         # Set up ortogonal planes
-        self.xImagePlaneWidget.SetInput( self.transformed_T2image )
+        self.xImagePlaneWidget.SetInputData( self.transformed_T2image )
         self.xImagePlaneWidget.SetSliceIndex(0)
-        self.yImagePlaneWidget.SetInput( self.transformed_T2image )
+        self.yImagePlaneWidget.SetInputData( self.transformed_T2image )
         self.yImagePlaneWidget.SetSliceIndex(0)
-        self.zImagePlaneWidget.SetInput( self.transformed_T2image )
+        self.zImagePlaneWidget.SetInputData( self.transformed_T2image )
         self.zImagePlaneWidget.SetSliceIndex(0)
                     
         # Create a text property for both cube axes
@@ -659,7 +653,7 @@ class Display(object):
         # Create a vtkCubeAxesActor2D.  Use the outer edges of the bounding box to
         # draw the axes.  Add the actor to the renderer.
         axesT2 = vtk.vtkCubeAxesActor2D()
-        axesT2.SetInput(self.transformed_T2image)
+        axesT2.SetInputData(self.transformed_T2image)
         axesT2.SetCamera(self.renderer1.GetActiveCamera())
         axesT2.SetLabelFormat("%6.4g")
         axesT2.SetFlyModeToOuterEdges()
@@ -670,7 +664,7 @@ class Display(object):
         
         ### Update T2Images
         t_T2images = vtk.vtkImageChangeInformation()
-        t_T2images.SetInput( T2images )
+        t_T2images.SetInputData( T2images )
         t_T2images.SetOutputOrigin(self.T2origin)
         t_T2images.Update()        
 
@@ -703,11 +697,11 @@ class Display(object):
         self.zImagePlaneWidget.Modified()
                 
         # Set up ortogonal planes
-        self.xImagePlaneWidget.SetInput(self.warpT2_mha )
+        self.xImagePlaneWidget.SetInputData(self.warpT2_mha )
         self.xImagePlaneWidget.SetSliceIndex(0)
-        self.yImagePlaneWidget.SetInput(self.warpT2_mha )
+        self.yImagePlaneWidget.SetInputData(self.warpT2_mha )
         self.yImagePlaneWidget.SetSliceIndex(0)
-        self.zImagePlaneWidget.SetInput( self.warpT2_mha )
+        self.zImagePlaneWidget.SetInputData( self.warpT2_mha )
         self.zImagePlaneWidget.SetSliceIndex(0)
                     
         # Create a text property for both cube axes
@@ -718,7 +712,7 @@ class Display(object):
         # Create a vtkCubeAxesActor2D.  Use the outer edges of the bounding box to
         # draw the axes.  Add the actor to the renderer.
         axesT2 = vtk.vtkCubeAxesActor2D()
-        axesT2.SetInput(self.warpT2_mha)
+        axesT2.SetInputData(self.warpT2_mha)
         axesT2.SetCamera(self.renderer1.GetActiveCamera())
         axesT2.SetLabelFormat("%6.4g")
         axesT2.SetFlyModeToOuterEdges()
@@ -860,7 +854,7 @@ class Display(object):
     
                 # Create mappers and actors
                 annot_mapper_mesh = vtk.vtkPolyDataMapper()
-                annot_mapper_mesh.SetInput( annot_poly )
+                annot_mapper_mesh.SetInputData( annot_poly )
                             
                 self.annot_actor = vtk.vtkActor()
                 self.annot_actor.SetMapper(annot_mapper_mesh)

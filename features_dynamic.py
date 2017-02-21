@@ -75,7 +75,7 @@ class Dynamic(object):
   
         # polygonal data --> image stencil:
         pol2stenc = vtk.vtkPolyDataToImageStencil()
-        pol2stenc.SetInput(VOI_mesh)
+        pol2stenc.SetInputData(VOI_mesh)
         pol2stenc.SetOutputOrigin(im.GetOrigin())
         pol2stenc.SetOutputSpacing(im.GetSpacing())
         pol2stenc.SetOutputWholeExtent(white_image.GetExtent())
@@ -83,8 +83,8 @@ class Dynamic(object):
          
         # cut the corresponding white image and set the background:
         imgstenc = vtk.vtkImageStencil()
-        imgstenc.SetInput(white_image)
-        imgstenc.SetStencil(pol2stenc.GetOutput())
+        imgstenc.SetInputData(white_image)
+        imgstenc.SetStencilData(pol2stenc.GetOutput())
         imgstenc.ReverseStencilOff()
         imgstenc.SetBackgroundValue(0.0)
         imgstenc.Update()
@@ -539,8 +539,8 @@ class Dynamic(object):
         
         # create a set of Parameters
         params = Parameters()
-        params.add('amp',   value= 10,  min=0)
-        params.add('alpha', value= 1, min=0) 
+        params.add('amp',   value=10,  min=0, max=100)
+        params.add('alpha', value=1, min=0) 
         params.add('beta', value= 0.05, min=0.0001, max=0.9)
         
         # do fit, here with leastsq model
@@ -564,18 +564,18 @@ class Dynamic(object):
         #####
         myfit = Minimizer(fcn2min,  params, fcn_args=(t,), fcn_kws={'data':data})
         myfit.prepare_fit()
-        myfit.leastsq()
+        res_fit = myfit.leastsq()
             
         # On a successful fit using the leastsq method, several goodness-of-fit statistics
         # and values related to the uncertainty in the fitted variables will be calculated
         print "myfit.success"
-        print myfit.success
+        print res_fit.success
         print "myfit.residual"
-        print myfit.residual
+        print res_fit.residual
         print "myfit.chisqr"
-        print myfit.chisqr
+        print res_fit.chisqr
         print "myfit.redchi"
-        print myfit.redchi
+        print res_fit.redchi
             
         # calculate final result
         #final = data + myfit.residual
@@ -588,29 +588,40 @@ class Dynamic(object):
         print "R^2"
         print R_square
         
-        self.amp = params['amp'].value
-        self.alpha = params['alpha'].value
-        self.beta = params['beta'].value
+        # plot results
+        pylab.figure()
+        pylab.errorbar(t, data, yerr=se_deltaS, fmt='ro', label='data+SE') # data 'ro' red dots as markers
+        pylab.plot(t, model, 'b', label='model')    # model fit 'b' blue
+        pylab.plot(x, model_res, 'k', label='model fit')    # model fit 'k' blakc
+        pylab.xlabel(" post-contrast time (min)")
+        pylab.ylabel("delta S(t)")
+        pylab.legend()
+
+        #####################################
+        # Derive parameters and features 
+        self.amp = res_fit.params['amp'].value
+        self.alpha = res_fit.params['alpha'].value 
+        self.beta = res_fit.params['beta'].value  
         
         ##################################################
         # Now Calculate Extract parameters from model
-        self.iAUC1 = params['amp'].value *( ((1-exp(-params['beta'].value*t[1]))/params['beta'].value) + (exp((-params['alpha'].value+params['beta'].value)*t[1])-1)/(params['alpha'].value+params['beta'].value) )
+        self.iAUC1 = self.amp *( ((1-exp(-self.beta*t[1]))/self.beta) + (exp((-self.alpha+self.beta)*t[1])-1)/(self.alpha+self.beta) )
         print "iAUC1"
         print self.iAUC1
         
-        self.Slope_ini = params['amp'].value*params['alpha'].value
+        self.Slope_ini = self.amp*self.alpha
         print "Slope_ini"
         print self.Slope_ini
     
-        self.Tpeak = (1/params['alpha'].value)*log(1+(params['alpha'].value/params['beta'].value))
+        self.Tpeak = (1/self.alpha)*log(1+(self.alpha/self.beta))
         print "Tpeak"
         print self.Tpeak
     
-        self.Kpeak = -params['amp'].value * params['alpha'].value * params['beta'].value
+        self.Kpeak = -self.amp * self.alpha * self.beta
         print "Kpeak"
         print self.Kpeak
     
-        self.SER = exp( (t[4]-t[1])*params['beta'].value) * ( (1-exp(-params['alpha'].value*t[1]))/(1-exp(-params['alpha'].value*t[4])) )
+        self.SER = exp( (t[4]-t[1])*self.beta) * ( (1-exp(-self.alpha*t[1]))/(1-exp(-self.alpha*t[4])) )
         print "SER"
         print self.SER
         

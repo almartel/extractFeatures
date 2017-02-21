@@ -31,7 +31,7 @@ for fileline in file_ids:
     # Get the line: StudyNumber    DicomExamNumber    MRN    chosen_lesions_id    StudyDate    SeriesID    image_pos_pat    image_ori_pat
     fileline = fileline.split()
     StudyID = fileline[0] 
-    DicomExamNumber = fileline[1]
+    AccessionN = fileline[1]
     Lesions_id = fileline[3]
     SeriesID = fileline[5] # corresponds to dynamic sequence;
         
@@ -40,13 +40,13 @@ for fileline in file_ids:
     # Get Root folder ( the directory of the script being run)
     path_rootFolder = 'Z:\Cristina\MassNonmass\mass'
     load = Inputs_init()
-    [series_path, phases_series, lesionID_path] = load.readVolumes(path_rootFolder, StudyID, DicomExamNumber, SeriesID, Lesions_id)
+    [series_path, phases_series, lesionID_path, lesionseg_name] = load.readVolumes(path_rootFolder, StudyID, AccessionN, SeriesID, Lesions_id)
     print "Path to series location: %s" % series_path 
     print "List of pre and post contrast volume names: %s" % phases_series
     print "Path to lesion segmentation: %s" % lesionID_path
     
     print "\n Load Segmentation..."
-    lesion3D = load.loadSegmentation(lesionID_path)
+    lesion3D = load.loadSegmentation(lesionID_path, lesionseg_name)
     print "Data Structure: %s" % lesion3D.GetClassName()
     print "Number of points: %d" % int(lesion3D.GetNumberOfPoints())
     print "Number of cells: %d" % int(lesion3D.GetNumberOfCells())

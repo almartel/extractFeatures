@@ -73,7 +73,7 @@ class Morphology(object):
   
         # polygonal data --> image stencil:
         pol2stenc = vtk.vtkPolyDataToImageStencil()
-        pol2stenc.SetInput(VOI_mesh)
+        pol2stenc.SetInputData(VOI_mesh)
         pol2stenc.SetOutputOrigin(im.GetOrigin())
         pol2stenc.SetOutputSpacing(im.GetSpacing())
         pol2stenc.SetOutputWholeExtent(white_image.GetExtent())
@@ -82,8 +82,8 @@ class Morphology(object):
          
         # cut the corresponding white image and set the background:
         imgstenc = vtk.vtkImageStencil()
-        imgstenc.SetInput(white_image)
-        imgstenc.SetStencil(pol2stenc.GetOutput())
+        imgstenc.SetInputData(white_image)
+        imgstenc.SetStencilData(pol2stenc.GetOutput())
         imgstenc.ReverseStencilOff()
         imgstenc.SetBackgroundValue(0.0)
         imgstenc.Update()
@@ -263,7 +263,7 @@ class Morphology(object):
         # Measure VOI
         ###################################
         VOI_massProperty = vtk.vtkMassProperties()
-        VOI_massProperty.SetInput(VOI_mesh)
+        VOI_massProperty.SetInputData(VOI_mesh)
         VOI_massProperty.Update()
         
         # get VOI volume
@@ -283,7 +283,7 @@ class Morphology(object):
         print "VOI_efect_diameter = ", self.VOI_efect_diameter
             
         centerOfMassFilter = vtk.vtkCenterOfMass()
-        centerOfMassFilter.SetInput( VOI_mesh )
+        centerOfMassFilter.SetInputData( VOI_mesh )
         centerOfMassFilter.SetUseScalarsAsWeights(False)
         centerOfMassFilter.Update()
         
@@ -300,7 +300,7 @@ class Morphology(object):
         
         # compute volume of lesion within a sphere of effective diameter
         sphereVOI_massProperty = vtk.vtkMassProperties()
-        sphereVOI_massProperty.SetInput(sphere_effectD.GetOutput())
+        sphereVOI_massProperty.SetInputData(sphere_effectD.GetOutput())
         sphereVOI_massProperty.Update()
         sphereVOI_vol = sphereVOI_massProperty.GetVolume() # mm3
     
@@ -407,7 +407,7 @@ class Morphology(object):
         
         # get model_point_normals
         VOI_point_normals = vtk.vtkPolyDataNormals()
-        VOI_point_normals.SetInput( VOI_mesh )
+        VOI_point_normals.SetInputData( VOI_mesh )
         VOI_point_normals.SetComputePointNormals(1)
         VOI_point_normals.SetComputeCellNormals(0)
         VOI_point_normals.SplittingOff()

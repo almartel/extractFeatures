@@ -189,9 +189,10 @@ class Inputs_init:
             # Append to objects image            
             self.DICOMImages.append( im )
             
-        lesionID_path = 'C:'+os.sep+'Users'+os.sep+'windows'+os.sep+'Documents'+os.sep+'repoCode-local'+os.sep+'registerT2andfeatures'+os.sep+'segmentations'
+        lesionID_path = 'Z:\\Breast\\gtSeg_verified'
+        lesionseg_name = '{}_{}_{}.vtk'.format(str(Lesions_id), str(StudyID), str(DicomExamNumber))
         
-        return(series_path, phases_series, lesionID_path)        
+        return(series_path, phases_series, lesionID_path, lesionseg_name)        
         
         
     def readT2(self, path_T2Series):
