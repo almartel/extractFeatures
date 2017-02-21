@@ -57,7 +57,7 @@ class Inputs_init:
     
     # Gets only_files in directory of folder mydir, excluding subdirectories folders
     def get_only_filesindirectory(self, mydir):
-        return [name for name in os.listdir(mydir) 
+        return [name for name in os.listdir(mydir) if not name == 'files'
             if os.path.isfile(os.path.join(mydir, name))]
        
     def ReadDicomfiles(self, abspath_PhaseID):
@@ -108,50 +108,47 @@ class Inputs_init:
         # test
         ###############################################################
         os.chdir(series_path)   
-        if os.path.exists('DynPhases'):
-            print '''DynPhases'''
             
-            # Get series to load
-            series_path = path_rootFolder+os.sep+str(StudyID)+os.sep+str(DicomExamNumber)
-            lesionID_path = series_path+os.sep+'DynPhases'+os.sep+'VOIlesions_id'+str(Lesions_id)
-            
-            phases_series=[]
-            testSID = str(SeriesID)
-            if 'S' in str(testSID):
-                #print testSID[1:]
-                chosen_phase = int(testSID[1:])
-            else:
-                chosen_phase = int(testSID)
-            
-            if(testSID[0] == 'S'):
-                phases_series.append('S'+str(chosen_phase))
-                                
-                for chSer in [chosen_phase+1, chosen_phase+2, chosen_phase+3, chosen_phase+4]:
-                    phases_series.append( 'S'+str(chSer) )    
-            else:
-                phases_series.append(str(chosen_phase))
-                                
-                for chSer in [chosen_phase+1, chosen_phase+2, chosen_phase+3, chosen_phase+4]:
-                    phases_series.append( str(chSer) )
-
-        if not os.path.exists('DynPhases'):
-            print '''SeriesPhases'''
-            
-            # Get series to load
-            series_path = path_rootFolder+os.sep+str(StudyID)+os.sep+str(DicomExamNumber)+os.sep+str(SeriesID)
-            lesionID_path = series_path+os.sep+'VOIlesions_id'+str(Lesions_id)    
-                                                       
-            # process all Volumes when in stacks of Dyn Volumes
-            if os.path.exists(series_path+os.sep+'pre-Contrast'):
-                phases_series = []
-                phases_series.append('pre-Contrast')
-                        
-                #"Arranging series scans"
-                for i in range(1,5):
-                    phases_series.append('post_Contrast-'+str(i))
+        # Get series to load
+        print '''SeriesPhases'''
+        phases_series=[]
+        testSID = str(SeriesID)
+        if 'S' in str(testSID):
+            #print testSID[1:]
+            chosen_phase = int(testSID[1:])
+        else:
+            chosen_phase = int(testSID)
         
+        if(testSID[0] == 'S'):
+            phases_series.append('S'+str(chosen_phase))
+                            
+            for chSer in [chosen_phase+1, chosen_phase+2, chosen_phase+3, chosen_phase+4]:
+                phases_series.append( 'S'+str(chSer) )    
+        else:
+            phases_series.append(str(chosen_phase))
+                            
+            for chSer in [chosen_phase+1, chosen_phase+2, chosen_phase+3, chosen_phase+4]:
+                phases_series.append( str(chSer) )
+
+#        if not os.path.exists('DynPhases'):
+#            print '''DynPhases'''
+#            
+#            # Get series to load
+#            series_path = path_rootFolder+os.sep+str(StudyID)+os.sep+str(DicomExamNumber)+os.sep+str(SeriesID)
+#            lesionID_path = series_path+os.sep+'VOIlesions_id'+str(Lesions_id)    
+#                                                       
+#            # process all Volumes when in stacks of Dyn Volumes
+#            if os.path.exists(series_path+os.sep+'pre-Contrast'):
+#                phases_series = []
+#                phases_series.append('pre-Contrast')
+#                        
+#                #"Arranging series scans"
+#                for i in range(1,5):
+#                    phases_series.append('post_Contrast-'+str(i))
+            
         # Get total number of files and some DICOM tags needed fro DICOM coords
         pre_abspath_PhaseID = series_path+os.sep+phases_series[0]
+        print(pre_abspath_PhaseID)
         [len_listSeries_files, FileNms_slices_sorted_stack] = self.ReadDicomfiles(pre_abspath_PhaseID)
         mostleft_slice = FileNms_slices_sorted_stack.iloc[0]['slices'] 
         self.neworigen = FileNms_slices_sorted_stack.iloc[0]['location']
@@ -223,7 +220,8 @@ class Inputs_init:
         self.T2image_pos_pat = list(dicomInfoT2[0x0020,0x0032].value)
         self.T2image_ori_pat = list(dicomInfoT2[0x0020,0x0037].value)
         self.T2fatsat = dicomInfoT2[0x0019,0x10a4].value
-       
+        #self.T2fatsat = 0
+        
         os.chdir(path_T2Series)               
         dicomReader  = vtk.vtkDICOMImageReader()
         dicomReader.SetDirectoryName( path_T2Series )

@@ -10,6 +10,8 @@ import dicom
 from operator import itemgetter
 import pandas as pd
 
+from os import listdir
+from os.path import isfile, join
 
 '''
 Compilation of functions
@@ -66,8 +68,8 @@ def get_only_linksindirectory(mydir):
 
 # Gets only_files in directory of folder mydir, excluding subdirectories folders
 def get_only_filesindirectory(mydir):
-     return [name for name in os.listdir(mydir) 
-            if os.path.isfile(os.path.join(mydir, name))]
+    return [name for name in os.listdir(mydir) if not name == 'files'
+        if os.path.isfile(os.path.join(mydir, name))]
 
 # Finds a substring within a string of chars
 def find(strng, ch):
@@ -498,24 +500,16 @@ def ReadDicomfiles(abspath_PhaseID):
     slices = []
     FileNms_slices =  []
     
-    listSeries_files = sorted(list(get_only_filesindirectory(str(abspath_PhaseID))))
+    listSeries_files = list(get_only_filesindirectory(str(abspath_PhaseID)))
     len_listSeries_files = len(listSeries_files)
                 
     for n in range(len_listSeries_files):
         # Use all DICOM slices on series
         ''' EXTRACT DICOM SLICE LOCATION '''
         absp_fsID = str(abspath_PhaseID)+os.sep+listSeries_files[n]
-                
-        if(absp_fsID!=str(abspath_PhaseID)+os.sep+'DIRCONTENTS.txt'):
-            dInfo = dicom.read_file(absp_fsID)
-            slices.append(dInfo.SliceLocation)
-            FileNms_slices.append(listSeries_files[n])
-        else:
-            cmd = 'rm '+str(abspath_PhaseID)+os.sep+'DIRCONTENTS.txt'
-            print "cmd -> " + cmd
-            p1 = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE)
-            p1.wait()
-            len_listSeries_files = len_listSeries_files-1
+        dInfo = dicom.read_file(absp_fsID, force=True )
+        slices.append(dInfo.SliceLocation)
+        FileNms_slices.append(listSeries_files[n])
 
     print "Total images in series: %d " % len_listSeries_files
 

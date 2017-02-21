@@ -25,7 +25,7 @@ import pylab
 
 from inputs_init import *
 from display import *
-
+import processDicoms
 
 #!/usr/bin/env python
 class Dynamic(object):
@@ -60,6 +60,7 @@ class Dynamic(object):
         self.peakVr = 0
         self.Vr_increasingRate = 0 
         self.Vr_post_1 = 0
+    
         
     def __call__(self):       
         """ Turn Class into a callable object """
@@ -113,8 +114,7 @@ class Dynamic(object):
             print phases_series[i]
              
             # Get total number of files
-            load = Inputs_init()
-            [len_listSeries_files, FileNms_slices_sorted_stack] = load.ReadDicomfiles(abspath_PhaseID)
+            [len_listSeries_files, FileNms_slices_sorted_stack] = processDicoms.ReadDicomfiles(abspath_PhaseID)
             mostleft_slice = FileNms_slices_sorted_stack.slices[0]
             
             # Get dicom header, retrieve
@@ -259,7 +259,7 @@ class Dynamic(object):
         print myfit.redchi
             
         # calculate final result
-        final = data + myfit.residual
+        #final = data + myfit.residual
         # write error report
         report_errors(params)
         
@@ -396,7 +396,6 @@ class Dynamic(object):
         # try to plot results
         pylab.figure()
         pylab.errorbar(t, data, yerr=se_deltaS, fmt='ro', label='data+SE') # data 'ro' red dots as markers
-        pylab.plot(t, final, 'b+', label='data+residuals')    # data+residuals 'b+' blue pluses
         pylab.plot(t, model, 'b', label='model')    # model fit 'b' blue
         pylab.plot(x, model_res, 'k', label='model fit')    # model fit 'k' blakc
         pylab.xlabel(" post-contrast time (min)")
@@ -421,8 +420,7 @@ class Dynamic(object):
             print phases_series[i]
             
             # Get total number of files
-            load = Inputs_init()
-            [len_listSeries_files, FileNms_slices_sorted_stack] = load.ReadDicomfiles(abspath_PhaseID)
+            [len_listSeries_files, FileNms_slices_sorted_stack] = processDicoms.ReadDicomfiles(abspath_PhaseID)
             mostleft_slice = FileNms_slices_sorted_stack.slices[0]
             
             # Get dicom header, retrieve
@@ -580,7 +578,7 @@ class Dynamic(object):
         print myfit.redchi
             
         # calculate final result
-        final = data + myfit.residual
+        #final = data + myfit.residual
         # write error report
         report_errors(params)
         
@@ -716,7 +714,7 @@ class Dynamic(object):
         # try to plot results
         pylab.figure()
         pylab.errorbar(t, data, yerr=se_deltaS, fmt='ro', label='data+SE') # data 'ro' red dots as markers
-        pylab.plot(t, final, 'b+', label='data+residuals')    # data+residuals 'b+' blue pluses
+        #pylab.plot(t, final, 'b+', label='data+residuals')    # data+residuals 'b+' blue pluses
         pylab.plot(t, model, 'b', label='model')    # model fit 'b' blue
         pylab.plot(x, model_res, 'k', label='model fit')    # model fit 'k' blakc
         pylab.xlabel(" post-contrast time (min)")

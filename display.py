@@ -571,19 +571,19 @@ class Display(object):
     def addT2visualize(self, T2images, image_pos_pat, image_ori_pat, T2dims, T2spacing, interact):
         '''Added to build second reference frame and display T2 overlayed into T1 reference frame'''
         # Proceed to build reference frame for display objects based on DICOM coords   
-        [transformed_T2image, transform_cube] = self.dicomTransform(T2images, image_pos_pat, image_ori_pat)
+        [self.transformed_T2image, transform_cube] = self.dicomTransform(T2images, image_pos_pat, image_ori_pat)
         
-        self.T2origin = list(transformed_T2image.GetOrigin())
+        self.T2origin = list(self.transformed_T2image.GetOrigin())
         print "T2 Extent"
-        self.T2extent = list(transformed_T2image.GetExtent())
+        self.T2extent = list(self.transformed_T2image.GetExtent())
         print self.T2extent        
         
         # Set up ortogonal planes
-        self.xImagePlaneWidget.SetInput( transformed_T2image )
+        self.xImagePlaneWidget.SetInput( self.transformed_T2image )
         self.xImagePlaneWidget.SetSliceIndex(0)
-        self.yImagePlaneWidget.SetInput( transformed_T2image )
+        self.yImagePlaneWidget.SetInput( self.transformed_T2image )
         self.yImagePlaneWidget.SetSliceIndex(0)
-        self.zImagePlaneWidget.SetInput( transformed_T2image )
+        self.zImagePlaneWidget.SetInput( self.transformed_T2image )
         self.zImagePlaneWidget.SetSliceIndex(0)
                     
         # Create a text property for both cube axes
@@ -598,7 +598,7 @@ class Display(object):
         # Create a vtkCubeAxesActor2D.  Use the outer edges of the bounding box to
         # draw the axes.  Add the actor to the renderer.
         axesT2 = vtk.vtkCubeAxesActor2D()
-        axesT2.SetInput(transformed_T2image)
+        axesT2.SetInput(self.transformed_T2image)
         axesT2.SetCamera(self.renderer1.GetActiveCamera())
         axesT2.SetLabelFormat("%6.4g")
         axesT2.SetFlyModeToOuterEdges()
@@ -614,31 +614,37 @@ class Display(object):
             
         return
         
-    def addT2transvisualize(self, T2images, image_pos_pat, image_ori_pat, T2dims, T2spacing, sideBreast, interact):
+    def addT2transvisualize(self, T2images, image_pos_pat, image_ori_pat, T2dims, T2spacing, interact):
         '''Added to build second reference frame and display T2 overlayed into T1 reference frame'''
         # Proceed to build reference frame for display objects based on DICOM coords   
         [transformed_T2image, transform_cube] = self.dicomTransform(T2images, image_pos_pat, image_ori_pat)
         
-        #alignR = int(raw_input('\nAlign right? Yes:1 No:0 : '))
-        #if alignR:
-        if(sideBreast=="Right"):
+        self.T2origin = list(transformed_T2image.GetOrigin())
+        print "T2 Extent"
+        self.T2extent = list(transformed_T2image.GetExtent())
+        print self.T2extent        
+        
+        alignR = int(raw_input('\nAlign right? Yes:1 or align with T1w: !=1 : '))
+        if alignR:
             zf1 = self.T1spacing[2]*self.T1extent[5] + self.T1origin[2]
             self.T2origin[2] = zf1 - T2spacing[2]*self.T2extent[5] # this is z-span
         else:
             self.T2origin[2] = self.T1origin[2]
-        
+                
         # Change info origin
-        translated_T2image = vtk.vtkImageChangeInformation()
-        translated_T2image.SetInput( transformed_T2image )
-        translated_T2image.SetOutputOrigin(self.T2origin)
-        translated_T2image.Update()
+        transformedInfo_T2image = vtk.vtkImageChangeInformation()
+        transformedInfo_T2image.SetInput( transformed_T2image )
+        transformedInfo_T2image.SetOutputOrigin(self.T2origin)
+        transformedInfo_T2image.Update()
+        
+        self.transformed_T2image = transformedInfo_T2image.GetOutput()
         
         # Set up ortogonal planes
-        self.xImagePlaneWidget.SetInput( translated_T2image.GetOutput() )
+        self.xImagePlaneWidget.SetInput( self.transformed_T2image )
         self.xImagePlaneWidget.SetSliceIndex(0)
-        self.yImagePlaneWidget.SetInput( translated_T2image.GetOutput() )
+        self.yImagePlaneWidget.SetInput( self.transformed_T2image )
         self.yImagePlaneWidget.SetSliceIndex(0)
-        self.zImagePlaneWidget.SetInput( translated_T2image.GetOutput() )
+        self.zImagePlaneWidget.SetInput( self.transformed_T2image )
         self.zImagePlaneWidget.SetSliceIndex(0)
                     
         # Create a text property for both cube axes
@@ -653,7 +659,7 @@ class Display(object):
         # Create a vtkCubeAxesActor2D.  Use the outer edges of the bounding box to
         # draw the axes.  Add the actor to the renderer.
         axesT2 = vtk.vtkCubeAxesActor2D()
-        axesT2.SetInput(translated_T2image.GetOutput())
+        axesT2.SetInput(self.transformed_T2image)
         axesT2.SetCamera(self.renderer1.GetActiveCamera())
         axesT2.SetLabelFormat("%6.4g")
         axesT2.SetFlyModeToOuterEdges()
